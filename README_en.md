@@ -115,7 +115,7 @@ insightfacepaddle --rec --base_lib ./base.txt --input ./demo.mp4 --output ./outp
 ```
 
 
-3. Detect and recognize
+3. Detection and recognition
 
 * Image(s)
 ```bash

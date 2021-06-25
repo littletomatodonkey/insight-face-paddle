@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 import argparse
 import requests
@@ -22,7 +21,6 @@ import pickle
 import tarfile
 from functools import partial
 
-
 import cv2
 import numpy as np
 from tqdm import tqdm
@@ -31,7 +29,6 @@ from PIL import Image, ImageDraw
 import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
-
 
 __all__ = ['PaddleFace']
 BASE_INFERENCE_MODEL_DIR = os.path.expanduser("~/.insightface/ppmodels/")
@@ -43,24 +40,81 @@ def parser(add_help=True):
         return v.lower() in ("true", "t", "1")
 
     parser = argparse.ArgumentParser(add_help=add_help)
-    parser.add_argument("--det_model", type=str, default="BlazeFace", help="The detection model.")
-    parser.add_argument("--rec_model", type=str, default="MobileFace", help="The recognition model.")
-    parser.add_argument("--use_gpu", type=str2bool, default=True, help="Whether use GPU to predict. Default by True.")
-    parser.add_argument("--enable_mkldnn", type=str2bool, default=False, help="Whether use MKLDNN to predict, valid only when --use_gpu is False. Default by False.")
-    parser.add_argument("--cpu_threads", type=int, default=1, help="The num of threads with CPU, valid only when --use_gpu is False. Default by 1.")
+    parser.add_argument(
+        "--det_model",
+        type=str,
+        default="BlazeFace",
+        help="The detection model.")
+    parser.add_argument(
+        "--rec_model",
+        type=str,
+        default="MobileFace",
+        help="The recognition model.")
+    parser.add_argument(
+        "--use_gpu",
+        type=str2bool,
+        default=True,
+        help="Whether use GPU to predict. Default by True.")
+    parser.add_argument(
+        "--enable_mkldnn",
+        type=str2bool,
+        default=False,
+        help="Whether use MKLDNN to predict, valid only when --use_gpu is False. Default by False."
+    )
+    parser.add_argument(
+        "--cpu_threads",
+        type=int,
+        default=1,
+        help="The num of threads with CPU, valid only when --use_gpu is False. Default by 1."
+    )
     # parser.add_argument("--image", type=str, help="The path or directory of image file(s) to be predicted.")
     # parser.add_argument("--video", type=str, help="The path of video file to be predicted, valid only when --image is not specified.")
-    parser.add_argument("--input", type=str, help="The path or directory of image(s) or video to be predicted.")
-    parser.add_argument("--output", type=str, help="The directory of prediction result.")
-    parser.add_argument("--det", action="store_true", help="Whether to detect.")
-    parser.add_argument("--threshold", type=float, default=0.5, help="The threshold of detection postprocess. Default by 0.5.")
-    parser.add_argument("--rec", action="store_true", help="Whether to recognize.")
-    parser.add_argument("--base_lib", type=str, default=None, help="The path of base lib file.")
-    parser.add_argument("--cdd_num", type=int, default=10, help="The number of candidates in the recognition retrieval. Default by 10.")
-    parser.add_argument("--max_batch_size", type=int, default=1, help="The maxium of batch_size to recognize. Default by 1.")
-    parser.add_argument("--build_lib", type=str, default=None, help="The base lib path to build.")
-    parser.add_argument("--img_dir", type=str, default=None, help="The img(s) dir used to build base lib.")
-    parser.add_argument("--label", type=str, default=None, help="The label file path used to build base lib.")
+    parser.add_argument(
+        "--input",
+        type=str,
+        help="The path or directory of image(s) or video to be predicted.")
+    parser.add_argument(
+        "--output", type=str, help="The directory of prediction result.")
+    parser.add_argument(
+        "--det", action="store_true", help="Whether to detect.")
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.5,
+        help="The threshold of detection postprocess. Default by 0.5.")
+    parser.add_argument(
+        "--rec", action="store_true", help="Whether to recognize.")
+    parser.add_argument(
+        "--base_lib",
+        type=str,
+        default=None,
+        help="The path of base lib file.")
+    parser.add_argument(
+        "--cdd_num",
+        type=int,
+        default=10,
+        help="The number of candidates in the recognition retrieval. Default by 10."
+    )
+    parser.add_argument(
+        "--max_batch_size",
+        type=int,
+        default=1,
+        help="The maxium of batch_size to recognize. Default by 1.")
+    parser.add_argument(
+        "--build_lib",
+        type=str,
+        default=None,
+        help="The base lib path to build.")
+    parser.add_argument(
+        "--img_dir",
+        type=str,
+        default=None,
+        help="The img(s) dir used to build base lib.")
+    parser.add_argument(
+        "--label",
+        type=str,
+        default=None,
+        help="The label file path used to build base lib.")
 
     return parser
 
@@ -98,44 +152,61 @@ def download_with_progressbar(url, save_path):
             f"Something went wrong while downloading model/image from {url}")
 
 
-def check_model_file(model_name):
+def check_model_file(model):
     """Check the model files exist and download and untar when no exist. 
     """
-    model_map = {"ArcFace": "arcface_iresnet50_v1.0_infer", "BlazeFace": "blazeface_fpn_ssh_1000e_v1.0_infer", "MobileFace": "mobileface_v1.0_infer"}
-    if model_name not in model_map:
-        raise Exception(f"The specifed model_name error. Only support 'BlazeFace' for detection and 'ArcFace' and 'MobileFace' for recognition.")
+    model_map = {
+        "ArcFace": "arcface_iresnet50_v1.0_infer",
+        "BlazeFace": "blazeface_fpn_ssh_1000e_v1.0_infer",
+        "MobileFace": "mobileface_v1.0_infer"
+    }
 
-    storage_directory = partial(os.path.join, BASE_INFERENCE_MODEL_DIR,
-                                model_name)
-    url = BASE_DOWNLOAD_URL.format(model_map[model_name])
+    if os.path.isdir(model):
+        model_file_path = os.path.join(model, "inference.pdmodel")
+        params_file_path = os.path.join(model, "inference.pdiparams")
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            raise Exception(
+                f"The specifed model directory error. The drectory must include 'inference.pdmodel' and 'inference.pdiparams'."
+            )
 
-    tar_file_name_list = [
-        "inference.pdiparams", "inference.pdiparams.info", "inference.pdmodel"
-    ]
-    model_file_path = storage_directory("inference.pdmodel")
-    params_file_path = storage_directory("inference.pdiparams")
-    if not os.path.exists(model_file_path) or not os.path.exists(
-            params_file_path):
-        tmp_path = storage_directory(url.split("/")[-1])
-        logging.info(f"Download {url} to {tmp_path}")
-        os.makedirs(storage_directory(), exist_ok=True)
-        download_with_progressbar(url, tmp_path)
-        with tarfile.open(tmp_path, "r") as tarObj:
-            for member in tarObj.getmembers():
-                filename = None
-                for tar_file_name in tar_file_name_list:
-                    if tar_file_name in member.name:
-                        filename = tar_file_name
-                if filename is None:
-                    continue
-                file = tarObj.extractfile(member)
-                with open(storage_directory(filename), "wb") as f:
-                    f.write(file.read())
-        os.remove(tmp_path)
-    if not os.path.exists(model_file_path) or not os.path.exists(
-            params_file_path):
+    elif model in model_map:
+        storage_directory = partial(os.path.join, BASE_INFERENCE_MODEL_DIR,
+                                    model)
+        url = BASE_DOWNLOAD_URL.format(model_map[model])
+
+        tar_file_name_list = [
+            "inference.pdiparams", "inference.pdiparams.info",
+            "inference.pdmodel"
+        ]
+        model_file_path = storage_directory("inference.pdmodel")
+        params_file_path = storage_directory("inference.pdiparams")
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            tmp_path = storage_directory(url.split("/")[-1])
+            logging.info(f"Download {url} to {tmp_path}")
+            os.makedirs(storage_directory(), exist_ok=True)
+            download_with_progressbar(url, tmp_path)
+            with tarfile.open(tmp_path, "r") as tarObj:
+                for member in tarObj.getmembers():
+                    filename = None
+                    for tar_file_name in tar_file_name_list:
+                        if tar_file_name in member.name:
+                            filename = tar_file_name
+                    if filename is None:
+                        continue
+                    file = tarObj.extractfile(member)
+                    with open(storage_directory(filename), "wb") as f:
+                        f.write(file.read())
+            os.remove(tmp_path)
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            raise Exception(
+                f"Something went wrong while downloading and unzip the model[{model}] files!"
+            )
+    else:
         raise Exception(
-            f"Something went wrong while praparing the model[{model_name}] files!"
+            f"The specifed model name error. Support 'BlazeFace' for detection and 'ArcFace' and 'MobileFace' for recognition. And support local directory that include model files ('inference.pdmodel' and 'inference.pdiparams')."
         )
 
     return model_file_path, params_file_path
@@ -193,7 +264,9 @@ class ColorMap(object):
                 color_map[i * 3 + 2] |= (((lab >> 2) & 1) << (7 - j))
                 j += 1
                 lab >>= 3
-        self.color_list = [color_map[i:i + 3] for i in range(0, len(color_map), 3)]
+        self.color_list = [
+            color_map[i:i + 3] for i in range(0, len(color_map), 3)
+        ]
 
 
 class ImageReader(object):
@@ -207,7 +280,9 @@ class ImageReader(object):
             self.image_list = []
             if os.path.isfile(inputs):
                 if imghdr.what(inputs) not in imgtype_list:
-                    raise Exception(f"Error type of input path, only support: {imgtype_list}")
+                    raise Exception(
+                        f"Error type of input path, only support: {imgtype_list}"
+                    )
                 self.image_list.append(inputs)
             elif os.path.isdir(inputs):
                 tmp_file_list = os.listdir(inputs)
@@ -222,7 +297,9 @@ class ImageReader(object):
                     else:
                         warn_tag = True
                 if warn_tag:
-                    logging.warning(f"The directory of input contine directory or not supported file type, only support: {imgtype_list}")
+                    logging.warning(
+                        f"The directory of input contine directory or not supported file type, only support: {imgtype_list}"
+                    )
             else:
                 raise Exception("The input path is not exist!")
 
@@ -232,7 +309,7 @@ class ImageReader(object):
     def __next__(self):
         if self.idx >= len(self.image_list):
             raise StopIteration
-    
+
         data = self.image_list[self.idx]
         if isinstance(data, np.ndarray):
             self.idx += 1
@@ -247,7 +324,6 @@ class ImageReader(object):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.idx += 1
         return img, file_name
-        
 
     def __len__(self):
         return len(self.image_list)
@@ -258,7 +334,9 @@ class VideoReader(object):
         super().__init__()
         videotype_list = {"mp4"}
         if os.path.splitext(inputs)[-1][1:] not in videotype_list:
-            raise Exception(f"The input file is not supported, only support: {videotype_list}")
+            raise Exception(
+                f"The input file is not supported, only support: {videotype_list}"
+            )
         self.capture = cv2.VideoCapture(inputs)
         self.file_name = os.path.split(inputs)[-1]
 
@@ -266,11 +344,11 @@ class VideoReader(object):
         info = {}
         width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(* 'mp4v')
         info["file_name"] = self.file_name
         info["fps"] = 30
         info["shape"] = (width, height)
-        info["fourcc"]= cv2.VideoWriter_fourcc(*'mp4v')
+        info["fourcc"] = cv2.VideoWriter_fourcc(* 'mp4v')
         return info
 
     def __iter__(self):
@@ -287,7 +365,9 @@ class ImageWriter(object):
     def __init__(self, output_dir):
         super().__init__()
         if output_dir is None:
-            raise Exception("Please specify the directory of saving prediction results by --output.")
+            raise Exception(
+                "Please specify the directory of saving prediction results by --output."
+            )
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         self.output_dir = output_dir
@@ -301,12 +381,15 @@ class VideoWriter(object):
     def __init__(self, output_dir, video_info):
         super().__init__()
         if output_dir is None:
-            raise Exception("Please specify the directory of saving prediction results by --output.")
+            raise Exception(
+                "Please specify the directory of saving prediction results by --output."
+            )
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         output_path = os.path.join(output_dir, video_info["file_name"])
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        self.writer = cv2.VideoWriter(output_path, video_info["fourcc"], video_info["fps"], video_info["shape"])
+        fourcc = cv2.VideoWriter_fourcc(* 'mp4v')
+        self.writer = cv2.VideoWriter(output_path, video_info["fourcc"],
+                                      video_info["fps"], video_info["shape"])
 
     def write(self, frame, file_name):
         self.writer.write(frame)
@@ -320,7 +403,8 @@ class BasePredictor(object):
     def __init__(self, predictor_config):
         super().__init__()
         self.predictor_config = predictor_config
-        self.predictor, self.input_names, self.output_names = self.load_predictor(predictor_config["model_file"], predictor_config["params_file"])
+        self.predictor, self.input_names, self.output_names = self.load_predictor(
+            predictor_config["model_file"], predictor_config["params_file"])
 
     def load_predictor(self, model_file, params_file):
         config = Config(model_file, params_file)
@@ -329,7 +413,8 @@ class BasePredictor(object):
             config.switch_ir_optim(True)
         else:
             config.disable_gpu()
-            config.set_cpu_math_library_num_threads(self.predictor_config["cpu_threads"])
+            config.set_cpu_math_library_num_threads(self.predictor_config[
+                "cpu_threads"])
 
             if self.predictor_config["enable_mkldnn"]:
                 try:
@@ -337,7 +422,9 @@ class BasePredictor(object):
                     config.set_mkldnn_cache_capacity(10)
                     config.enable_mkldnn()
                 except Exception as e:
-                    logging.error("The current environment does not support `mkldnn`, so disable mkldnn.")
+                    logging.error(
+                        "The current environment does not support `mkldnn`, so disable mkldnn."
+                    )
         config.disable_glog_info()
         config.enable_memory_optim()
         # use zero copy
@@ -363,16 +450,24 @@ class Detector(BasePredictor):
         self.det_config = det_config
 
     def preprocess(self, img):
-        img = normalize_image(img, scale=1./255., mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], order='hwc')
+        img = normalize_image(
+            img,
+            scale=1. / 255.,
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+            order='hwc')
         img_info = {}
-        img_info["im_shape"] = np.array(img.shape[:2], dtype=np.float32)[np.newaxis, :]
+        img_info["im_shape"] = np.array(
+            img.shape[:2], dtype=np.float32)[np.newaxis, :]
         img = img.transpose((2, 0, 1)).copy()
         img_info["image"] = img[np.newaxis, :, :, :]
-        img_info["scale_factor"] = np.array([1., 1.], dtype=np.float32)[np.newaxis, :]
+        img_info["scale_factor"] = np.array(
+            [1., 1.], dtype=np.float32)[np.newaxis, :]
         return img_info
 
     def postprocess(self, np_boxes):
-        expect_boxes = (np_boxes[:, 1] > self.det_config["threshold"]) & (np_boxes[:, 0] > -1)
+        expect_boxes = (np_boxes[:, 1] > self.det_config["threshold"]) & (
+            np_boxes[:, 0] > -1)
         return np_boxes[expect_boxes, :]
 
     def predict(self, img):
@@ -394,14 +489,20 @@ class Recognizer(BasePredictor):
         super().__init__(predictor_config)
         if rec_config["base_lib"] is not None:
             if rec_config["build_lib"] is not None:
-                raise Exception("Only one of base_lib and build_lib can be set!")
+                raise Exception(
+                    "Only one of base_lib and build_lib can be set!")
             self.load_base_lib(rec_config["base_lib"])
         elif rec_config["build_lib"] is None:
             raise Exception("One of base_lib and build_lib have to be set!")
         self.rec_config = rec_config
 
     def preprocess(self, img, box_list=None):
-        img = normalize_image(img, scale=1./255., mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], order='hwc')
+        img = normalize_image(
+            img,
+            scale=1. / 255.,
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5],
+            order='hwc')
         if box_list is None:
             height, width = img.shape[:2]
             box_list = [[0, 0, 0, 0, width, height]]
@@ -412,10 +513,12 @@ class Recognizer(BasePredictor):
             box[2:][box[2:] < 0] = 0
             xmin, ymin, xmax, ymax = list(map(int, box[2:]))
             face_img = img[ymin:ymax, xmin:xmax, :]
-            face_img = cv2.resize(face_img, (112, 112)).transpose((2, 0, 1)).copy()
+            face_img = cv2.resize(face_img, (112, 112)).transpose(
+                (2, 0, 1)).copy()
             batch.append(face_img)
             cnt += 1
-            if cnt % self.rec_config["max_batch_size"] == 0 or (idx + 1) == len(box_list):
+            if cnt % self.rec_config["max_batch_size"] == 0 or (
+                    idx + 1) == len(box_list):
                 input_batches.append(np.array(batch))
                 batch = []
         return input_batches
@@ -429,9 +532,12 @@ class Recognizer(BasePredictor):
         for feature in np_feature:
             diff = np.subtract(base_feature, feature)
             dist = np.sum(np.square(diff), -1)
-            candidate_idx = np.argpartition(dist ,range(10))[:self.rec_config["cdd_num"]]
-            candidate_label_list = list(np.array(self.base_lib["label"])[candidate_idx])
-            maxlabel = max(candidate_label_list, key=candidate_label_list.count)
+            candidate_idx = np.argpartition(
+                dist, range(10))[:self.rec_config["cdd_num"]]
+            candidate_label_list = list(
+                np.array(self.base_lib["label"])[candidate_idx])
+            maxlabel = max(candidate_label_list,
+                           key=candidate_label_list.count)
             labels.append(maxlabel)
         return labels
 
@@ -447,7 +553,8 @@ class Recognizer(BasePredictor):
                 input_tensor = self.predictor.get_input_handle(input_name)
                 input_tensor.copy_from_cpu(batch)
             self.predictor.run()
-            output_tensor = self.predictor.get_output_handle(self.output_names[0])
+            output_tensor = self.predictor.get_output_handle(self.output_names[
+                0])
             np_feature = output_tensor.copy_to_cpu()
             feature_list.append(np_feature)
         return np.array(feature_list)
@@ -457,21 +564,30 @@ class InsightFace(object):
     def __init__(self, args, print_info=True):
         super().__init__()
         if not (args.det or args.rec) and not args.build_lib:
-            raise Exception("Specify at least the detection(--det) or recognition(--rec) or --build_lib!")
+            raise Exception(
+                "Specify at least the detection(--det) or recognition(--rec) or --build_lib!"
+            )
 
         if print_info:
             print_config(args)
-        
+
         if args.build_lib:
             if args.img_dir is None or args.label is None:
-                raise Exception("Please specify the --img_dir and --label when build base lib.")
+                raise Exception(
+                    "Please specify the --img_dir and --label when build base lib."
+                )
             args.det, args.rec = True, True
-        
+
         self.args = args
 
-        predictor_config = {"use_gpu": args.use_gpu, "enable_mkldnn": args.enable_mkldnn, "cpu_threads": args.cpu_threads}
+        predictor_config = {
+            "use_gpu": args.use_gpu,
+            "enable_mkldnn": args.enable_mkldnn,
+            "cpu_threads": args.cpu_threads
+        }
         if args.det:
-            model_file_path, params_file_path = check_model_file(args.det_model)
+            model_file_path, params_file_path = check_model_file(
+                args.det_model)
             det_config = {"threshold": args.threshold}
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
@@ -479,8 +595,15 @@ class InsightFace(object):
             self.color_map = ColorMap(100)
 
         if args.rec:
-            model_file_path, params_file_path = check_model_file(args.rec_model)
-            rec_config = {"max_batch_size": args.max_batch_size, "resize": 112, "base_lib": args.base_lib, "build_lib":args.build_lib, "cdd_num": args.cdd_num}
+            model_file_path, params_file_path = check_model_file(
+                args.rec_model)
+            rec_config = {
+                "max_batch_size": args.max_batch_size,
+                "resize": 112,
+                "base_lib": args.base_lib,
+                "build_lib": args.build_lib,
+                "cdd_num": args.cdd_num
+            }
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.rec_predictor = Recognizer(rec_config, predictor_config)
@@ -504,7 +627,7 @@ class InsightFace(object):
             # draw bbox
             draw.line(
                 [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
-                (xmin, ymin)],
+                 (xmin, ymin)],
                 width=draw_thickness,
                 fill=color)
 
@@ -539,7 +662,9 @@ class InsightFace(object):
                 self.input_reader = ImageReader(input_data)
                 self.output_writer = ImageWriter(self.args.output)
         else:
-            raise Exception(f"The input data error. Only support path of image or video(.mp4) and dirctory that include images.")
+            raise Exception(
+                f"The input data error. Only support path of image or video(.mp4) and dirctory that include images."
+            )
 
         for img, file_name in self.input_reader:
             if img is None:
@@ -555,7 +680,6 @@ class InsightFace(object):
                 self.output_writer.write(result, file_name)
             logging.info(f"File: {file_name}, predict label(s): {labels}")
         logging.info(f"Predict complete!")
-
 
     def build_lib(self):
         img_dir = self.args.img_dir
