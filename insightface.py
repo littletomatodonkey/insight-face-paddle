@@ -67,8 +67,6 @@ def parser(add_help=True):
         default=1,
         help="The num of threads with CPU, valid only when --use_gpu is False. Default by 1."
     )
-    # parser.add_argument("--image", type=str, help="The path or directory of image file(s) to be predicted.")
-    # parser.add_argument("--video", type=str, help="The path of video file to be predicted, valid only when --image is not specified.")
     parser.add_argument(
         "--input",
         type=str,
@@ -738,5 +736,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    args = parser().parse_args()
-    main(args)
+    main()
