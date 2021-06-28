@@ -1,0 +1,6 @@
+requests
+opencv-python==4.4.0.46
+numpy
+Pillow
+tqdm
+prettytable
