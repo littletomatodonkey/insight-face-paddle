@@ -450,6 +450,12 @@ class Detector(BasePredictor):
         self.det_config = det_config
 
     def preprocess(self, img):
+        resize_h, resize_w = self.det_config["target_size"]
+        img_shape = img.shape
+        img_scale_x = resize_w / img_shape[1]
+        img_scale_y = resize_h / img_shape[0]
+        img = cv2.resize(
+            img, None, None, fx=img_scale_x, fy=img_scale_y, interpolation=1)
         img = normalize_image(
             img,
             scale=1. / 255.,
@@ -459,10 +465,11 @@ class Detector(BasePredictor):
         img_info = {}
         img_info["im_shape"] = np.array(
             img.shape[:2], dtype=np.float32)[np.newaxis, :]
+        img_info["scale_factor"] = np.array(
+            [img_scale_y, img_scale_x], dtype=np.float32)[np.newaxis, :]
+
         img = img.transpose((2, 0, 1)).copy()
         img_info["image"] = img[np.newaxis, :, :, :]
-        img_info["scale_factor"] = np.array(
-            [1., 1.], dtype=np.float32)[np.newaxis, :]
         return img_info
 
     def postprocess(self, np_boxes):
@@ -589,6 +596,7 @@ class InsightFace(object):
             model_file_path, params_file_path = check_model_file(
                 args.det_model)
             det_config = {"threshold": args.threshold}
+            det_config["target_size"] = [640, 640]
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.det_predictor = Detector(det_config, predictor_config)
