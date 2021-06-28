@@ -1,9 +1,9 @@
 # InsightFace Paddle
 
-## Introduction
+## 1. Introduction
 `InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include BlazeFace for face detection, ArcFace and MobileFace for face recognition.
 
-## Installation
+## 2. Installation
 1. Install PaddlePaddle
 
 PaddlePaddle 2.0 or later is required for `InsightFacePaddle`. You can use the following steps to install PaddlePaddle.
@@ -15,7 +15,7 @@ pip3 install paddlepaddle-gpu
 # for CPU
 pip3 install paddlepaddle
 ```
-More details about installation refer to [PaddlePaddle](https://www.paddlepaddle.org.cn/).
+For more details about installation. please refer to [PaddlePaddle](https://www.paddlepaddle.org.cn/).
 
 2. Install requirements
 
@@ -41,15 +41,15 @@ python3 setup.py bdist_wheel
 pip3 install dist/*
 ```
 
-## Quick Start
+## 3. Quick Start
 
 `InsightFacePaddle` support two ways of use, including `Commad Line` and `Python API`.
 
-### Command Line
+### 3.1 Command Line
 
 You can use `InsightFacePaddle` in Command Line.
 
-#### Get help
+#### 3.1.1 Get help
 
 You can get the help about `InsightFacePaddle` by following command.
 
@@ -65,21 +65,21 @@ The args are as follows:
 | use_gpu | bool | True | Whether use GPU to predict. Default by True. |
 | enable_mkldnn | bool | False | Whether use MKLDNN to predict, valid only when --use_gpu is False. Default by False. |
 | cpu_threads | int | 1 | The num of threads with CPU, valid only when --use_gpu is False. Default by 1. |
-| input | str | | The path of video to be predicted. Or the path or directory of image file(s) to be predicted. |
-| output | str | | The directory to save prediction result. |
-| det | | | Whether to detect. |
+| input | str | - | The path of video to be predicted. Or the path or directory of image file(s) to be predicted. |
+| output | str | - | The directory to save prediction result. |
+| det | bool | False | Whether to detect. |
 | threshold | float | 0.5 | The threshold of detection postprocess. Default by 0.5. |
-| rec | | | Whether to recognize. |
-| base_lib | str | | The path of base lib file. |
+| rec | bool | False | Whether to recognize. |
+| base_lib | str | - | The path of base lib file. |
 | cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by 10. |
 | max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by 1. |
-| build_lib | str | | The base lib path to build. |
-| img_dir | str | | The img(s) dir used to build base lib. |
-| label | str | | The label file path used to build base lib. |
+| build_lib | str | - | The base lib path to build. |
+| img_dir | str | - | The img(s) dir used to build base lib. |
+| label | str | - | The label file path used to build base lib. |
 
 
 
-#### Build base lib
+#### 3.1.2 Build base lib
 
 Before start predicting, you have to build the base lib.
 
@@ -87,7 +87,7 @@ Before start predicting, you have to build the base lib.
 insightfacepaddle --build_lib ./base.txt --img_dir ./data/imgs --label ./data/label.txt
 ```
 
-#### Predict
+#### 3.1.3 Predict
 
 1. Detection only
 
@@ -127,7 +127,7 @@ insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.jpeg --output
 insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.mp4 --output ./output/
 ```
 
-### Python
+### 3.2 Python
 
 You can use `InsightFacePaddle` in Python. First, import `InsightFacePaddle`:
 
@@ -135,7 +135,7 @@ You can use `InsightFacePaddle` in Python. First, import `InsightFacePaddle`:
 import insightface as face
 ```
 
-#### Get help
+#### 3.2.1 Get help
 
 ```python
 parser = face.parser()
@@ -143,7 +143,7 @@ help_info = parser.print_help()
 print(help_info)
 ```
 
-#### Building base lib
+#### 3.2.2 Building base lib
 
 ```python
 parser = face.parser()
@@ -156,7 +156,7 @@ predictor = face.InsightFace(args)
 predictor.build_lib()
 ```
 
-#### Prediction
+#### 3.2.3 Prediction
 
 1. Detection only
 

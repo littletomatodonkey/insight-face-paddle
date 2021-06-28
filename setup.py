@@ -28,25 +28,28 @@ def readme():
 setup(
     name='insightface_paddle',
     version='0.0.0',
-    keywords=['insight face', 'Arcface', 'BlazeFace', 'MobileFace', 'face detection', 'face recognition', 'PaddlePaddle'],
+    keywords=[
+        'insight face', 'Arcface', 'BlazeFace', 'MobileFace', 'face detection',
+        'face recognition', 'PaddlePaddle'
+    ],
     description='A toolkit for face detection and recognition powered by PaddlePaddle.',
     long_description=readme(),
     long_description_content_type='text/markdown',
-    # TODO
     author='Baidu',
-    author_email='@baidu.com',
-    url='https://github.com/PaddlePaddle/',
-    packages=["insightface"],
-    package_dir={'insightface': ''},
+    author_email='dazhiningsibuqu@163.com',
+    url='https://github.com/littletomatodonkey/insight-face-paddle',
+    packages=["insightface_paddle"],
+    package_dir={'insightface_paddle': ''},
     include_package_data=True,
-    entry_points={"console_scripts": ["insightfacepaddle=insightface:main"]},
+    entry_points={
+        "console_scripts": ["insightfacepaddle=insightface_paddle:main"]
+    },
     install_requires=requirements,
     license='Apache License 2.0',
-    # TODO
-    download_url='',
-
+    download_url='https://github.com/littletomatodonkey/insight-face-paddle.git',
     classifiers=[
-        'Intended Audience :: Developers', 'Operating System :: OS Independent',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
         'Natural Language :: Chinese (Simplified)',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',

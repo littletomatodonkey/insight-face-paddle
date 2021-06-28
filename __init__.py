@@ -13,4 +13,4 @@
 # limitations under the License.
 
 __all__ = ['parser', 'InsightFace']
-from .insightface import parser, InsightFace, main
+from .insightface_paddle import InsightFace, parser, main

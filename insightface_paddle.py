@@ -30,7 +30,7 @@ import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
-__all__ = ['PaddleFace']
+__all__ = ["InsightFace", "parser"]
 BASE_INFERENCE_MODEL_DIR = os.path.expanduser("~/.insightface/ppmodels/")
 BASE_DOWNLOAD_URL = "https://paddle-model-ecology.bj.bcebos.com/model/insight-face/{}.tar"
 
