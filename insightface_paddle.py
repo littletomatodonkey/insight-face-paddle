@@ -25,7 +25,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 from prettytable import PrettyTable
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
@@ -510,12 +510,12 @@ class Recognizer(BasePredictor):
             order='hwc')
         if box_list is None:
             height, width = img.shape[:2]
-            box_list = [[0, 0, 0, 0, width, height]]
+            box_list = [np.array([0, 0, 0, 0, width, height])]
         batch = []
         input_batches = []
         cnt = 0
         for idx, box in enumerate(box_list):
-            box[2:][box[2:] < 0] = 0
+            box[box < 0] = 0
             xmin, ymin, xmax, ymax = list(map(int, box[2:]))
             face_img = img[ymin:ymax, xmin:xmax, :]
             face_img = cv2.resize(face_img, (112, 112)).transpose(
@@ -581,7 +581,7 @@ class InsightFace(object):
                 raise Exception(
                     "Please specify the --img_dir and --label when build base lib."
                 )
-            args.det, args.rec = True, True
+            args.det, args.rec = False, True
 
         self.args = args
 
@@ -593,8 +593,10 @@ class InsightFace(object):
         if args.det:
             model_file_path, params_file_path = check_model_file(
                 args.det_model)
-            det_config = {"threshold": args.threshold}
-            det_config["target_size"] = [640, 640]
+            det_config = {
+                "threshold": args.threshold,
+                "target_size": [640, 640]
+            }
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.det_predictor = Detector(det_config, predictor_config)
@@ -640,9 +642,10 @@ class InsightFace(object):
             # draw label
             text = "{} {:.4f}".format(label, score)
             tw, th = draw.textsize(text)
-            draw.rectangle(
-                [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
-            draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
+            size = max(int((xmax - xmin) // 10), 10)
+            font = ImageFont.truetype("./SourceHanSansCN-Regular.otf", size)
+            # draw.rectangle([(xmin, ymin), (xmin + tw, ymin + th)], fill=color)
+            draw.text((xmin + 1, ymin), text, fill=(255, 255, 255), font=font)
         return np.array(im)
 
     def predict_np_img(self, img):
@@ -703,21 +706,12 @@ class InsightFace(object):
                 logging.warning(f"Error in reading img {name}! Ignored.")
                 continue
             box_list, np_feature = self.predict_np_img(img)
-            if len(box_list) < 1:
-                logging.warning(f"No face detected in img {name}")
-                continue
-            feature = np_feature[0]
-            max_area = 0
-            for i, box in enumerate(box_list):
-                xmin, ymin, xmax, ymax = box[2:]
-                area = (ymax - ymin) * (xmax - xmin)
-                if area > max_area:
-                    feature = np_feature[i]
-            feature_list.append(feature)
+            feature_list.append(np_feature[0])
             label_list.append(label)
 
-            if idx % 1000 == 0:
-                logging.info(f"Idx: {idx}")
+            if idx % 100 == 0:
+                logging.info(f"Build idx: {idx}")
+        logging.info(f"Build done. Total {len(label_list)}.")
 
         with open(self.args.build_lib, 'wb') as f:
             pickle.dump({"label": label_list, "feature": feature_list}, f)
