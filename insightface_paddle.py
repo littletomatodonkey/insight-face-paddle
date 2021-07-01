@@ -23,6 +23,7 @@ from functools import partial
 
 import cv2
 import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 from prettytable import PrettyTable
 from PIL import Image, ImageDraw, ImageFont
@@ -76,10 +77,10 @@ def parser(add_help=True):
     parser.add_argument(
         "--det", action="store_true", help="Whether to detect.")
     parser.add_argument(
-        "--threshold",
+        "--det_thresh",
         type=float,
-        default=0.5,
-        help="The threshold of detection postprocess. Default by 0.5.")
+        default=0.8,
+        help="The threshold of detection postprocess. Default by 0.8.")
     parser.add_argument(
         "--rec", action="store_true", help="Whether to recognize.")
     parser.add_argument(
@@ -93,6 +94,11 @@ def parser(add_help=True):
         default=10,
         help="The number of candidates in the recognition retrieval. Default by 10."
     )
+    parser.add_argument(
+        "--rec_thresh",
+        type=float,
+        default=0.4,
+        help="The threshold of recognition postprocess. Default by 0.4.")
     parser.add_argument(
         "--max_batch_size",
         type=int,
@@ -446,9 +452,11 @@ class Detector(BasePredictor):
     def __init__(self, det_config, predictor_config):
         super().__init__(predictor_config)
         self.det_config = det_config
+        self.target_size = self.det_config["target_size"]
+        self.thresh = self.det_config["thresh"]
 
     def preprocess(self, img):
-        resize_h, resize_w = self.det_config["target_size"]
+        resize_h, resize_w = self.target_size
         img_shape = img.shape
         img_scale_x = resize_w / img_shape[1]
         img_scale_y = resize_h / img_shape[0]
@@ -471,8 +479,7 @@ class Detector(BasePredictor):
         return img_info
 
     def postprocess(self, np_boxes):
-        expect_boxes = (np_boxes[:, 1] > self.det_config["threshold"]) & (
-            np_boxes[:, 0] > -1)
+        expect_boxes = (np_boxes[:, 1] > self.thresh) & (np_boxes[:, 0] > -1)
         return np_boxes[expect_boxes, :]
 
     def predict(self, img):
@@ -500,6 +507,9 @@ class Recognizer(BasePredictor):
         elif rec_config["build_lib"] is None:
             raise Exception("One of base_lib and build_lib have to be set!")
         self.rec_config = rec_config
+        self.cdd_num = self.rec_config["cdd_num"]
+        self.thresh = self.rec_config["thresh"]
+        self.max_batch_size = self.rec_config["max_batch_size"]
 
     def preprocess(self, img, box_list=None):
         img = normalize_image(
@@ -522,8 +532,7 @@ class Recognizer(BasePredictor):
                 (2, 0, 1)).copy()
             batch.append(face_img)
             cnt += 1
-            if cnt % self.rec_config["max_batch_size"] == 0 or (
-                    idx + 1) == len(box_list):
+            if cnt % self.max_batch_size == 0 or (idx + 1) == len(box_list):
                 input_batches.append(np.array(batch))
                 batch = []
         return input_batches
@@ -532,23 +541,29 @@ class Recognizer(BasePredictor):
         pass
 
     def match(self, np_feature):
-        base_feature = np.array(self.base_lib["feature"]).squeeze()
         labels = []
         for feature in np_feature:
-            diff = np.subtract(base_feature, feature)
-            dist = np.sum(np.square(diff), -1)
-            candidate_idx = np.argpartition(
-                dist, range(10))[:self.rec_config["cdd_num"]]
-            candidate_label_list = list(
-                np.array(self.base_lib["label"])[candidate_idx])
-            maxlabel = max(candidate_label_list,
-                           key=candidate_label_list.count)
+            similarity = cosine_similarity(self.base_feature,
+                                           feature).squeeze()
+            abs_similarity = np.abs(similarity)
+            candidate_idx = np.argpartition(abs_similarity,
+                                            -self.cdd_num)[-self.cdd_num:]
+            remove_idx = np.where(abs_similarity[candidate_idx] < self.thresh)
+            candidate_idx = np.delete(candidate_idx, remove_idx)
+            candidate_label_list = list(np.array(self.label)[candidate_idx])
+            if len(candidate_label_list) == 0:
+                maxlabel = ""
+            else:
+                maxlabel = max(candidate_label_list,
+                               key=candidate_label_list.count)
             labels.append(maxlabel)
         return labels
 
     def load_base_lib(self, file_path):
         with open(file_path, "rb") as f:
-            self.base_lib = pickle.load(f)
+            base_lib = pickle.load(f)
+        self.label = base_lib["label"]
+        self.base_feature = np.array(base_lib["feature"]).squeeze()
 
     def predict(self, img, box_list=None):
         batch_list = self.preprocess(img, box_list)
@@ -593,10 +608,7 @@ class InsightFace(object):
         if args.det:
             model_file_path, params_file_path = check_model_file(
                 args.det_model)
-            det_config = {
-                "threshold": args.threshold,
-                "target_size": [640, 640]
-            }
+            det_config = {"thresh": args.det_thresh, "target_size": [640, 640]}
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.det_predictor = Detector(det_config, predictor_config)
@@ -608,6 +620,7 @@ class InsightFace(object):
             rec_config = {
                 "max_batch_size": args.max_batch_size,
                 "resize": 112,
+                "thresh": args.rec_thresh,
                 "base_lib": args.base_lib,
                 "build_lib": args.build_lib,
                 "cdd_num": args.cdd_num
@@ -615,6 +628,8 @@ class InsightFace(object):
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.rec_predictor = Recognizer(rec_config, predictor_config)
+            self.font_path = os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), "simfang.ttf")
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)
@@ -632,20 +647,22 @@ class InsightFace(object):
             color = tuple(self.color_map[label])
 
             xmin, ymin, xmax, ymax = bbox
-            # draw bbox
-            draw.line(
-                [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
-                 (xmin, ymin)],
-                width=draw_thickness,
-                fill=color)
 
-            # draw label
+            font_size = max(int((xmax - xmin) // 10), 10)
+            font = ImageFont.truetype(self.font_path, font_size)
+
             text = "{} {:.4f}".format(label, score)
-            tw, th = draw.textsize(text)
-            size = max(int((xmax - xmin) // 10), 10)
-            font = ImageFont.truetype("./SourceHanSansCN-Regular.otf", size)
-            # draw.rectangle([(xmin, ymin), (xmin + tw, ymin + th)], fill=color)
-            draw.text((xmin + 1, ymin), text, fill=(255, 255, 255), font=font)
+            th = font_size
+            tw = font.getsize(text)[0]
+            start_y = max(0, ymin - th)
+
+            draw.rectangle(
+                [(xmin + 1, start_y), (xmin + tw + 1, start_y + th)],
+                fill=color)
+            draw.text(
+                (xmin + 1, start_y), text, fill=(255, 255, 255), font=font)
+            draw.rectangle(
+                [(xmin, ymin), (xmax, ymax)], width=2, outline=color)
         return np.array(im)
 
     def predict_np_img(self, img):
