@@ -1,7 +1,9 @@
+[简体中文](README_ch.md) | English
+
 # InsightFace Paddle
 
 ## 1. Introduction
-`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include BlazeFace for face detection, ArcFace and MobileFace for face recognition.
+`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
 
 ## 2. Installation
 1. Install PaddlePaddle
@@ -68,10 +70,11 @@ The args are as follows:
 | input | str | - | The path of video to be predicted. Or the path or directory of image file(s) to be predicted. |
 | output | str | - | The directory to save prediction result. |
 | det | bool | False | Whether to detect. |
-| threshold | float | 0.5 | The threshold of detection postprocess. Default by 0.5. |
+| det_thresh | float | 0.5 | The threshold of detection postprocess. Default by 0.8. |
 | rec | bool | False | Whether to recognize. |
 | base_lib | str | - | The path of base lib file. |
 | cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by 10. |
+| rec_thresh | float | 0.5 | The threshold of match in recognition, use to remove candidates with low similarity. Default by 0.4. |
 | max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by 1. |
 | build_lib | str | - | The base lib path to build. |
 | img_dir | str | - | The img(s) dir used to build base lib. |
@@ -81,7 +84,7 @@ The args are as follows:
 
 #### 3.1.2 Build base lib
 
-Before start predicting, you have to build the base lib.
+If use recognition, before start predicting, you have to build the base lib.
 
 ```bash
 insightfacepaddle --build_lib ./base.txt --img_dir ./data/imgs --label ./data/label.txt
