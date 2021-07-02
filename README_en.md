@@ -1,12 +1,14 @@
+[简体中文](README_ch.md) | English
+
 # InsightFace Paddle
 
 ## 1. Introduction
-`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include BlazeFace for face detection, ArcFace and MobileFace for face recognition.
+`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
 
 ## 2. Installation
 1. Install PaddlePaddle
 
-PaddlePaddle 2.0 or later is required for `InsightFacePaddle`. You can use the following steps to install PaddlePaddle.
+PaddlePaddle 2.1 or later is required for `InsightFacePaddle`. You can use the following steps to install PaddlePaddle.
 
 ```bash
 # for GPU
@@ -68,71 +70,107 @@ The args are as follows:
 | input | str | - | The path of video to be predicted. Or the path or directory of image file(s) to be predicted. |
 | output | str | - | The directory to save prediction result. |
 | det | bool | False | Whether to detect. |
-| threshold | float | 0.5 | The threshold of detection postprocess. Default by 0.5. |
+| det_thresh | float | 0.5 | The threshold of detection postprocess. Default by 0.8. |
 | rec | bool | False | Whether to recognize. |
-| base_lib | str | - | The path of base lib file. |
+| index | str | - | The path of index file. |
 | cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by 10. |
+| rec_thresh | float | 0.5 | The threshold of match in recognition, use to remove candidates with low similarity. Default by 0.4. |
 | max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by 1. |
-| build_lib | str | - | The base lib path to build. |
-| img_dir | str | - | The img(s) dir used to build base lib. |
-| label | str | - | The label file path used to build base lib. |
+| build_index | str | - | The path of index to be build. |
+| img_dir | str | - | The img(s) dir used to build index. |
+| label | str | - | The label file path used to build index. |
 
 
+#### 3.1.2 Build index
 
-#### 3.1.2 Build base lib
-
-Before start predicting, you have to build the base lib.
+If use recognition, before start predicting, you have to build the index.
 
 ```bash
-insightfacepaddle --build_lib ./base.txt --img_dir ./data/imgs --label ./data/label.txt
+insightfacepaddle --build_index ./demo/friends/index.bin --img_dir ./demo/friends/gallery --label ./demo/friends/gallery/label.txt
 ```
+
+An example used to build index is as follows:
+<div align="center">
+<img src="./demo/friends/gallery/Rachel/Rachel00035.jpg"  width = "200" />
+</div>
 
 #### 3.1.3 Predict
 
 1. Detection only
 
 * Image(s)
+
+Use the figure below to predict:
+<div align="center">
+<img src="./demo/friends/query/friends1.jpg"  width = "800" />
+</div>
+
+The prediction command:
 ```bash
-insightfacepaddle --det --input ./demo.jpeg --output ./output/
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
 ```
+
+The result is under the directory `./demo/friends/output`:
+<div align="center">
+<img src="./demo/friends/output/friends1.jpg"  width = "800" />
+</div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo.mp4 --output ./output/
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
 ```
-
 
 2. Recognition only
 
 * Image(s)
+
+Use the figure below to predict:
+<div align="center">
+<img src="./demo/friends/query/Rachel.png"  width = "200" />
+</div>
+
+The prediction command:
 ```bash
-insightfacepaddle --rec --base_lib ./base.txt --input ./demo.jpep --output ./output/
+insightfacepaddle --rec --index ./demo/friends/index.bin --input ./demo/friends/query/Rachel.png
 ```
 
-* Video
+The result is output in the terminal:
 ```bash
-insightfacepaddle --rec --base_lib ./base.txt --input ./demo.mp4 --output ./output/
+INFO:root:File: Rachel., predict label(s): ['Rachel']
 ```
-
 
 3. Detection and recognition
 
 * Image(s)
+
+Use the figure below to predict:
+<div align="center">
+<img src="./demo/friends/query/friends2.jpg"  width = "800" />
+</div>
+
+The prediction command:
 ```bash
-insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.jpeg --output ./output/
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
 ```
+
+The result is under the directory `./demo/friends/output`:
+<div align="center">
+<img src="./demo/friends/output/friends2.jpg"  width = "800" />
+</div>
 
 * Video
 ```bash
-insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.mp4 --output ./output/
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
 ```
 
 ### 3.2 Python
 
-You can use `InsightFacePaddle` in Python. First, import `InsightFacePaddle`:
+You can use `InsightFacePaddle` in Python. First, import `InsightFacePaddle` and `logging` because `InsightFacePaddle` using that to control log.
 
 ```python
-import insightface as face
+import insightface_paddle as face
+import logging
+logging.basicConfig(level=logging.INFO)
 ```
 
 #### 3.2.1 Get help
@@ -143,17 +181,16 @@ help_info = parser.print_help()
 print(help_info)
 ```
 
-#### 3.2.2 Building base lib
+#### 3.2.2 Building index
 
 ```python
 parser = face.parser()
 args = parser.parse_args()
-
-args.build_lib = "./base.txt"
-args.img_dir = "./data/imgs"
-args.label = "./data/label.txt"
+args.build_index = "./demo/friends/index.bin"
+args.img_dir = "./demo/friends/gallery"
+args.label = "./demo/friends/gallery/label.txt"
 predictor = face.InsightFace(args)
-predictor.build_lib()
+predictor.build_index()
 ```
 
 #### 3.2.3 Prediction
@@ -161,90 +198,128 @@ predictor.build_lib()
 1. Detection only
 
 * Image(s)
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.jpeg"
 args.det = True
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
+
+* NumPy
+```python
+import cv2
+
+parser = face.parser()
+args = parser.parse_args()
+
+args.det = True
+args.output = "./demo/friends/output"
+path = "./demo/friends/query/friends1.jpg"
+img = cv2.imread(path)
+
+predictor = face.InsightFace(args)
+predictor.predict(img)
+```
+
+The prediction result saved as `"./demo/friends/output/tmp.png"`.
 
 * Video
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.mp4"
 args.det = True
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
-
 
 2. Recognition only
 
 * Image(s)
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.jpeg"
-args.base_lib = "./base.txt"
 args.rec = True
+args.index = "./demo/friends/index.bin"
+input_path = "./demo/friends/query/Rachel.png"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
 
-* Video
-```bash
+* NumPy
+```python
+import cv2
+
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.mp4"
-args.base_lib = "./base.txt"
 args.rec = True
+args.index = "./demo/friends/index.bin"
+path = "./demo/friends/query/Rachel.png"
+img = cv2.imread(path)
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(img)
 ```
 
 3. Detection and recognition
 
 * Image(s)
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.jpeg"
-args.base_lib = "./base.txt"
-args.rec = True
 args.det = True
+args.rec = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
 
-* Video
-```bash
+* NumPy
+```python
+import cv2
+
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.mp4"
-args.base_lib = "./base.txt"
-args.rec = True
 args.det = True
+args.rec = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+path = "./demo/friends/query/friends1.jpg"
+img = cv2.imread(path)
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(img)
+```
+
+The prediction result saved as `"./demo/friends/output/tmp.png"`.
+
+* Video
+```python
+parser = face.parser()
+args = parser.parse_args()
+
+args.det = True
+args.rec = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends.mp4"
+
+predictor = face.InsightFace(args)
+predictor.predict(input_path)
 ```
