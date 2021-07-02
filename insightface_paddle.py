@@ -84,10 +84,7 @@ def parser(add_help=True):
     parser.add_argument(
         "--rec", action="store_true", help="Whether to recognize.")
     parser.add_argument(
-        "--base_lib",
-        type=str,
-        default=None,
-        help="The path of base lib file.")
+        "--index", type=str, default=None, help="The path of index file.")
     parser.add_argument(
         "--cdd_num",
         type=int,
@@ -105,20 +102,20 @@ def parser(add_help=True):
         default=1,
         help="The maxium of batch_size to recognize. Default by 1.")
     parser.add_argument(
-        "--build_lib",
+        "--build_index",
         type=str,
         default=None,
-        help="The base lib path to build.")
+        help="The path of index to be build.")
     parser.add_argument(
         "--img_dir",
         type=str,
         default=None,
-        help="The img(s) dir used to build base lib.")
+        help="The img(s) dir used to build index.")
     parser.add_argument(
         "--label",
         type=str,
         default=None,
-        help="The label file path used to build base lib.")
+        help="The label file path used to build index.")
 
     return parser
 
@@ -305,7 +302,9 @@ class ImageReader(object):
                         f"The directory of input contine directory or not supported file type, only support: {imgtype_list}"
                     )
             else:
-                raise Exception("The input path is not exist!")
+                raise Exception(
+                    f"The file of input path not exist! Please check input: {inputs}"
+                )
 
     def __iter__(self):
         return self
@@ -340,6 +339,10 @@ class VideoReader(object):
         if os.path.splitext(inputs)[-1][1:] not in videotype_list:
             raise Exception(
                 f"The input file is not supported, only support: {videotype_list}"
+            )
+        if not os.path.isfile(inputs):
+            raise Exception(
+                f"The file of input path not exist! Please check input: {inputs}"
             )
         self.capture = cv2.VideoCapture(inputs)
         self.file_name = os.path.split(inputs)[-1]
@@ -499,13 +502,13 @@ class Detector(BasePredictor):
 class Recognizer(BasePredictor):
     def __init__(self, rec_config, predictor_config):
         super().__init__(predictor_config)
-        if rec_config["base_lib"] is not None:
-            if rec_config["build_lib"] is not None:
+        if rec_config["index"] is not None:
+            if rec_config["build_index"] is not None:
                 raise Exception(
-                    "Only one of base_lib and build_lib can be set!")
-            self.load_base_lib(rec_config["base_lib"])
-        elif rec_config["build_lib"] is None:
-            raise Exception("One of base_lib and build_lib have to be set!")
+                    "Only one of --index and --build_index can be set!")
+            self.load_index(rec_config["index"])
+        elif rec_config["build_index"] is None:
+            raise Exception("One of --index and --build_index have to be set!")
         self.rec_config = rec_config
         self.cdd_num = self.rec_config["cdd_num"]
         self.thresh = self.rec_config["thresh"]
@@ -543,7 +546,7 @@ class Recognizer(BasePredictor):
     def match(self, np_feature):
         labels = []
         for feature in np_feature:
-            similarity = cosine_similarity(self.base_feature,
+            similarity = cosine_similarity(self.index_feature,
                                            feature).squeeze()
             abs_similarity = np.abs(similarity)
             candidate_idx = np.argpartition(abs_similarity,
@@ -559,11 +562,11 @@ class Recognizer(BasePredictor):
             labels.append(maxlabel)
         return labels
 
-    def load_base_lib(self, file_path):
+    def load_index(self, file_path):
         with open(file_path, "rb") as f:
-            base_lib = pickle.load(f)
-        self.label = base_lib["label"]
-        self.base_feature = np.array(base_lib["feature"]).squeeze()
+            index = pickle.load(f)
+        self.label = index["label"]
+        self.index_feature = np.array(index["feature"]).squeeze()
 
     def predict(self, img, box_list=None):
         batch_list = self.preprocess(img, box_list)
@@ -583,21 +586,23 @@ class Recognizer(BasePredictor):
 class InsightFace(object):
     def __init__(self, args, print_info=True):
         super().__init__()
-        if not (args.det or args.rec) and not args.build_lib:
+        if not (args.det or args.rec) and not args.build_index:
             raise Exception(
-                "Specify at least the detection(--det) or recognition(--rec) or --build_lib!"
+                "Specify at least the detection(--det) or recognition(--rec) or --build_index!"
             )
 
         if print_info:
             print_config(args)
 
-        if args.build_lib:
+        if args.build_index:
             if args.img_dir is None or args.label is None:
                 raise Exception(
-                    "Please specify the --img_dir and --label when build base lib."
+                    "Please specify the --img_dir and --label when build index."
                 )
             args.det, args.rec = False, True
 
+        self.font_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), "simfang.ttf")
         self.args = args
 
         predictor_config = {
@@ -621,15 +626,13 @@ class InsightFace(object):
                 "max_batch_size": args.max_batch_size,
                 "resize": 112,
                 "thresh": args.rec_thresh,
-                "base_lib": args.base_lib,
-                "build_lib": args.build_lib,
+                "index": args.index,
+                "build_index": args.build_index,
                 "cdd_num": args.cdd_num
             }
             predictor_config["model_file"] = model_file_path
             predictor_config["params_file"] = params_file_path
             self.rec_predictor = Recognizer(rec_config, predictor_config)
-            self.font_path = os.path.join(
-                os.path.abspath(os.path.dirname(__file__)), "simfang.ttf")
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)
@@ -675,10 +678,11 @@ class InsightFace(object):
             np_feature = self.rec_predictor.predict(input_img, box_list)
         return box_list, np_feature
 
-    def predict(self, input_data):
+    def init_reader_writer(self, input_data):
         if isinstance(input_data, np.ndarray):
             self.input_reader = ImageReader(input_data)
-            self.output_writer = ImageWriter(self.args.output)
+            if hasattr(self, "det_predictor"):
+                self.output_writer = ImageWriter(self.args.output)
         elif isinstance(input_data, str):
             if input_data.endswith('mp4'):
                 self.input_reader = VideoReader(input_data)
@@ -686,12 +690,15 @@ class InsightFace(object):
                 self.output_writer = VideoWriter(self.args.output, info)
             else:
                 self.input_reader = ImageReader(input_data)
-                self.output_writer = ImageWriter(self.args.output)
+                if hasattr(self, "det_predictor"):
+                    self.output_writer = ImageWriter(self.args.output)
         else:
             raise Exception(
                 f"The input data error. Only support path of image or video(.mp4) and dirctory that include images."
             )
 
+    def predict(self, input_data):
+        self.init_reader_writer(input_data)
         for img, file_name in self.input_reader:
             if img is None:
                 logging.warning(f"Error in reading img {file_name}! Ignored.")
@@ -707,7 +714,7 @@ class InsightFace(object):
             logging.info(f"File: {file_name}, predict label(s): {labels}")
         logging.info(f"Predict complete!")
 
-    def build_lib(self):
+    def build_index(self):
         img_dir = self.args.img_dir
         label_path = self.args.label
         with open(label_path, "r") as f:
@@ -730,7 +737,7 @@ class InsightFace(object):
                 logging.info(f"Build idx: {idx}")
         logging.info(f"Build done. Total {len(label_list)}.")
 
-        with open(self.args.build_lib, 'wb') as f:
+        with open(self.args.build_index, 'wb') as f:
             pickle.dump({"label": label_list, "feature": feature_list}, f)
 
 
@@ -740,8 +747,8 @@ def main(args=None):
 
     args = parser().parse_args()
     predictor = InsightFace(args)
-    if args.build_lib:
-        predictor.build_lib()
+    if args.build_index:
+        predictor.build_index()
     else:
         predictor.predict(args.input)
 

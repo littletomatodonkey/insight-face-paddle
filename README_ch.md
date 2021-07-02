@@ -8,7 +8,7 @@
 ## 2. 安装
 1. 安装 PaddlePaddle
 
-`InsightFacePaddle` 需要使用 PaddlePaddle 2.0 及以上版本，你可以参考以下步骤安装。
+`InsightFacePaddle` 需要使用 PaddlePaddle 2.1 及以上版本，可以参考以下步骤安装。
 
 ```bash
 # for GPU
@@ -72,70 +72,104 @@ insightfacepaddle -h
 | det | bool | False | 是否进行检测。 |
 | det_thresh | float | 0.8 | 检测后处理的阈值，默认值为0.8。 |
 | rec | bool | False | 是否进行识别。 |
-| base_lib | str | - | 底库文件的路径。 |
+| index | str | - | 索引文件的路径。 |
 | cdd_num | int | 10 | 识别中检索阶段的候选数量，默认值为10。 |
 | rec_thresh | float | 0.5 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为0.4。 |
 | max_batch_size | int | 1 | 识别中 batch_size 上限，默认值为1。 |
-| build_lib | str | - | 要生成的底库文件路径。 |
-| img_dir | str | - | 用于构建底库的图像文件目录。 |
-| label | str | - | 用于构建底库的标签文件路径。 |
+| build_index | str | - | 要构建的索引文件路径。 |
+| img_dir | str | - | 用于构建索引的图像文件目录。 |
+| label | str | - | 用于构建索引的标签文件路径。 |
 
 
+#### 3.1.2 构建索引
 
-#### 3.1.2 构建底库
-
-如果使用识别功能，则在开始预测之前，必须构建底库，命令如下。
+如果使用识别功能，则在开始预测之前，必须先构建索引文件，命令如下。
 
 ```bash
-insightfacepaddle --build_lib ./base.txt --img_dir ./data/imgs --label ./data/label.txt
+insightfacepaddle --build_index ./demo/friends/index.bin --img_dir ./demo/friends/gallery --label ./demo/friends/gallery/label.txt
 ```
+
+用于构建索引的数据示例如下：
+<div align="center">
+<img src="./demo/friends/gallery/Rachel/Rachel00035.jpg"  width = "200" />
+</div>
 
 #### 3.1.3 预测
 
-1. 单检测
+1. 仅检测
 
 * Image(s)
+
+使用下图进行测试：
+<div align="center">
+<img src="./demo/friends/query/friends1.jpg"  width = "800" />
+</div>
+
+预测命令如下：
 ```bash
-insightfacepaddle --det --input ./demo.jpeg --output ./output/
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
 ```
+
+检测结果图位于路径 `./demo/friends/output` 下：
+<div align="center">
+<img src="./demo/friends/output/friends1.jpg"  width = "800" />
+</div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo.mp4 --output ./output/
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
 ```
 
-
-2. 单识别
+2. 仅识别
 
 * Image(s)
+
+使用下图进行测试：
+<div align="center">
+<img src="./demo/friends/query/Rachel.png"  width = "200" />
+</div>
+
+预测命令如下：
 ```bash
-insightfacepaddle --rec --base_lib ./base.txt --input ./demo.jpep --output ./output/
+insightfacepaddle --rec --index ./demo/friends/index.bin --input ./demo/friends/query/Rachel.png
 ```
+检测结果输出在终端中：
+```bash
+INFO:root:File: Rachel.png, predict label(s): ['Rachel']
+```
+
+3. 检测+识别系统串联
+
+* Image(s)
+
+使用下图进行测试：
+<div align="center">
+<img src="./demo/friends/query/friends2.jpg"  width = "800" />
+</div>
+
+预测命令如下：
+```bash
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
+```
+
+检测结果图位于路径 `./demo/friends/output` 下：
+<div align="center">
+<img src="./demo/friends/output/friends2.jpg"  width = "800" />
+</div>
 
 * Video
 ```bash
-insightfacepaddle --rec --base_lib ./base.txt --input ./demo.mp4 --output ./output/
-```
-
-
-3. 检测并识别
-
-* Image(s)
-```bash
-insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.jpeg --output ./output/
-```
-
-* Video
-```bash
-insightfacepaddle --det --rec --base_lib ./base.txt --input ./demo.mp4 --output ./output/
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
 ```
 
 ### 3.2 Python
 
-同样可以在 Python 中使用 `InsightFacePaddle`。首先导入 `InsightFacePaddle`：
+同样可以在 Python 中使用 `InsightFacePaddle`。首先导入 `InsightFacePaddle`，因为 `InsightFacePaddle` 使用 `logging` 控制日志输入，因此需要导入 `logging`。
 
 ```python
-import insightface as face
+import insightface_paddle as face
+import logging
+logging.basicConfig(level=logging.INFO)
 ```
 
 #### 3.2.1 获取参数信息
@@ -146,108 +180,141 @@ help_info = parser.print_help()
 print(help_info)
 ```
 
-#### 3.2.2 构建底库
+#### 3.2.2 构建索引
 
 ```python
 parser = face.parser()
 args = parser.parse_args()
-
-args.build_lib = "./base.txt"
-args.img_dir = "./data/imgs"
-args.label = "./data/label.txt"
+args.build_index = "./demo/friends/index.bin"
+args.img_dir = "./demo/friends/gallery"
+args.label = "./demo/friends/gallery/label.txt"
 predictor = face.InsightFace(args)
-predictor.build_lib()
+predictor.build_index()
 ```
 
 #### 3.2.3 预测
 
-1. 单检测
+1. 仅检测
 
 * Image(s)
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.jpeg"
 args.det = True
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
+```
+
+* NumPy
+```python
+import cv2
+
+parser = face.parser()
+args = parser.parse_args()
+
+args.det = True
+args.output = "./demo/friends/output"
+path = "./demo/friends/query/friends1.jpg"
+img = cv2.imread(path)
+
+predictor = face.InsightFace(args)
+predictor.predict(img)
 ```
 
 * Video
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.mp4"
 args.det = True
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
 
-
-2. 单识别
+2. 仅识别
 
 * Image(s)
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.jpeg"
-args.base_lib = "./base.txt"
 args.rec = True
+args.index = "./demo/friends/index.bin"
+input_path = "./demo/friends/query/Rachel.png"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
+```
+
+* NumPy
+```python
+import cv2
+
+parser = face.parser()
+args = parser.parse_args()
+
+args.rec = True
+args.index = "./demo/friends/index.bin"
+path = "./demo/friends/query/Rachel.png"
+img = cv2.imread(path)
+
+predictor = face.InsightFace(args)
+predictor.predict(img)
+```
+
+3. 检测+识别系统串联
+
+* Image(s)
+```python
+parser = face.parser()
+args = parser.parse_args()
+
+args.det = True
+args.rec = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends1.jpg"
+
+predictor = face.InsightFace(args)
+predictor.predict(input_path)
+```
+
+* NumPy
+```python
+import cv2
+
+parser = face.parser()
+args = parser.parse_args()
+
+args.det = True
+args.rec = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+path = "./demo/friends/query/friends1.jpg"
+img = cv2.imread(path)
+
+predictor = face.InsightFace(args)
+predictor.predict(img)
 ```
 
 * Video
-```bash
+```python
 parser = face.parser()
 args = parser.parse_args()
 
-args.output = "./output"
-args.input = "./demo.mp4"
-args.base_lib = "./base.txt"
-args.rec = True
-
-predictor = face.InsightFace(args)
-predictor.deploy_predict()
-```
-
-3. 检测并识别
-
-* Image(s)
-```bash
-parser = face.parser()
-args = parser.parse_args()
-
-args.output = "./output"
-args.input = "./demo.jpeg"
-args.base_lib = "./base.txt"
-args.rec = True
 args.det = True
-
-predictor = face.InsightFace(args)
-predictor.deploy_predict()
-```
-
-* Video
-```bash
-parser = face.parser()
-args = parser.parse_args()
-
-args.output = "./output"
-args.input = "./demo.mp4"
-args.base_lib = "./base.txt"
 args.rec = True
-args.det = True
+args.index = "./demo/friends/index.bin"
+args.output = "./demo/friends/output"
+input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.deploy_predict()
+predictor.predict(input_path)
 ```
