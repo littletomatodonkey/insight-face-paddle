@@ -64,18 +64,18 @@ The args are as follows:
 | ---- | ---- | ---- | ---- |
 | det_model | str | BlazeFace | The detection model. |
 | rec_model | str | MobileFace | The recognition model. |
-| use_gpu | bool | True | Whether use GPU to predict. Default by True. |
-| enable_mkldnn | bool | False | Whether use MKLDNN to predict, valid only when --use_gpu is False. Default by False. |
-| cpu_threads | int | 1 | The num of threads with CPU, valid only when --use_gpu is False. Default by 1. |
+| use_gpu | bool | True | Whether use GPU to predict. Default by `True`. |
+| enable_mkldnn | bool | False | Whether use MKLDNN to predict, valid only when `--use_gpu` is `False`. Default by `False`. |
+| cpu_threads | int | 1 | The num of threads with CPU, valid only when `--use_gpu` is `False` and `--enable_mkldnn` is `True`. Default by `1`. |
 | input | str | - | The path of video to be predicted. Or the path or directory of image file(s) to be predicted. |
 | output | str | - | The directory to save prediction result. |
 | det | bool | False | Whether to detect. |
-| det_thresh | float | 0.5 | The threshold of detection postprocess. Default by 0.8. |
+| det_thresh | float | 0.8 | The threshold of detection postprocess. Default by `0.8`. |
 | rec | bool | False | Whether to recognize. |
 | index | str | - | The path of index file. |
-| cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by 10. |
-| rec_thresh | float | 0.5 | The threshold of match in recognition, use to remove candidates with low similarity. Default by 0.4. |
-| max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by 1. |
+| cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by `10`. |
+| rec_thresh | float | 0.4 | The threshold of match in recognition, use to remove candidates with low similarity. Default by `0.4`. |
+| max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by `1`. |
 | build_index | str | - | The path of index to be build. |
 | img_dir | str | - | The img(s) dir used to build index. |
 | label | str | - | The label file path used to build index. |
@@ -100,7 +100,7 @@ An example used to build index is as follows:
 
 * Image(s)
 
-Use the figure below to predict:
+Use the image below to predict:
 <div align="center">
 <img src="./demo/friends/query/friends1.jpg"  width = "800" />
 </div>
@@ -124,7 +124,7 @@ insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo
 
 * Image(s)
 
-Use the figure below to predict:
+Use the image below to predict:
 <div align="center">
 <img src="./demo/friends/query/Rachel.png"  width = "200" />
 </div>
@@ -143,7 +143,7 @@ INFO:root:File: Rachel., predict label(s): ['Rachel']
 
 * Image(s)
 
-Use the figure below to predict:
+Use the image below to predict:
 <div align="center">
 <img src="./demo/friends/query/friends2.jpg"  width = "800" />
 </div>
@@ -220,7 +220,7 @@ args = parser.parse_args()
 args.det = True
 args.output = "./demo/friends/output"
 path = "./demo/friends/query/friends1.jpg"
-img = cv2.imread(path)
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
 predictor.predict(img)
@@ -266,7 +266,7 @@ args = parser.parse_args()
 args.rec = True
 args.index = "./demo/friends/index.bin"
 path = "./demo/friends/query/Rachel.png"
-img = cv2.imread(path)
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
 predictor.predict(img)
@@ -283,7 +283,7 @@ args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
 args.output = "./demo/friends/output"
-input_path = "./demo/friends/query/friends1.jpg"
+input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
 predictor.predict(input_path)
@@ -300,8 +300,8 @@ args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
 args.output = "./demo/friends/output"
-path = "./demo/friends/query/friends1.jpg"
-img = cv2.imread(path)
+path = "./demo/friends/query/friends2.jpg"
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
 predictor.predict(img)
