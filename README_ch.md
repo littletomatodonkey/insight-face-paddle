@@ -65,17 +65,17 @@ insightfacepaddle -h
 | det_model | str | BlazeFace | 检测模型名称，或本地模型文件所在目录，该目录下需包含 `inference.pdmodel`、`inference.pdiparams` 和 `inference.pdiparams.info` 三个文件。 |
 | rec_model | str | MobileFace | 识别模型名称，或本地模型文件所在目录，该目录下需包含 `inference.pdmodel`、`inference.pdiparams` 和 `inference.pdiparams.info` 三个文件。 |
 | use_gpu | bool | True | 是否使用 `GPU` 进行预测，默认为 `True`。 |
-| enable_mkldnn | bool | False | 是否开启 `MKLDNN` 进行预测，当 `--use_gpu` 为 `False` 时该参数有效，默认值为 `False`。 |
+| enable_mkldnn | bool | False | 是否开启 `MKLDNN` 进行预测，当 `--use_gpu` 为 `False` 且 `--enable_mkldnn` 为 `True` 时该参数有效，默认值为 `False`。 |
 | cpu_threads | int | 1 | CPU 预测时开启的线程数量，当 `--use_gpu` 为 `False` 时该参数有效，默认值为 `1`。 |
 | input | str | - | 要预测的视频文件或图像文件的路径，或包含图像文件的目录。 |
 | output | str | - | 保存预测结果的目录。|
 | det | bool | False | 是否进行检测。 |
-| det_thresh | float | 0.8 | 检测后处理的阈值，默认值为0.8。 |
+| det_thresh | float | 0.8 | 检测后处理的阈值，默认值为`0.8`。 |
 | rec | bool | False | 是否进行识别。 |
 | index | str | - | 索引文件的路径。 |
-| cdd_num | int | 10 | 识别中检索阶段的候选数量，默认值为10。 |
-| rec_thresh | float | 0.5 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为0.4。 |
-| max_batch_size | int | 1 | 识别中 batch_size 上限，默认值为1。 |
+| cdd_num | int | 10 | 识别中检索阶段的候选数量，默认值为`10`。 |
+| rec_thresh | float | 0.4 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为`0.4`。 |
+| max_batch_size | int | 1 | 识别中 batch_size 上限，默认值为`1`。 |
 | build_index | str | - | 要构建的索引文件路径。 |
 | img_dir | str | - | 用于构建索引的图像文件目录。 |
 | label | str | - | 用于构建索引的标签文件路径。 |
@@ -206,7 +206,8 @@ args.output = "./demo/friends/output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path)
+print(next(res))
 ```
 
 * NumPy
@@ -219,10 +220,11 @@ args = parser.parse_args()
 args.det = True
 args.output = "./demo/friends/output"
 path = "./demo/friends/query/friends1.jpg"
-img = cv2.imread(path)
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img)
+print(next(res))
 ```
 
 * Video
@@ -235,7 +237,9 @@ args.output = "./demo/friends/output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path)
+for _ in res:
+    print(_)
 ```
 
 2. 仅识别
@@ -250,7 +254,8 @@ args.index = "./demo/friends/index.bin"
 input_path = "./demo/friends/query/Rachel.png"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 * NumPy
@@ -263,10 +268,11 @@ args = parser.parse_args()
 args.rec = True
 args.index = "./demo/friends/index.bin"
 path = "./demo/friends/query/Rachel.png"
-img = cv2.imread(path)
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 3. 检测+识别系统串联
@@ -280,10 +286,11 @@ args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
 args.output = "./demo/friends/output"
-input_path = "./demo/friends/query/friends1.jpg"
+input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 * NumPy
@@ -297,11 +304,12 @@ args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
 args.output = "./demo/friends/output"
-path = "./demo/friends/query/friends1.jpg"
-img = cv2.imread(path)
+path = "./demo/friends/query/friends2.jpg"
+img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 * Video
@@ -316,5 +324,7 @@ args.output = "./demo/friends/output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+for _ in res:
+    pass
 ```
