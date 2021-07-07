@@ -107,17 +107,17 @@ insightfacepaddle --build_index ./demo/friends/index.bin --img_dir ./demo/friend
 
 预测命令如下：
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./output
 ```
 
-检测结果图位于路径 `./demo/friends/output` 下：
+检测结果图位于路径 `./output` 下：
 <div align="center">
 <img src="./demo/friends/output/friends1.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 2. 仅识别
@@ -149,17 +149,17 @@ INFO:root:File: Rachel.png, predict label(s): ['Rachel']
 
 预测命令如下：
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./output
 ```
 
-检测结果图位于路径 `./demo/friends/output` 下：
+检测结果图位于路径 `./output` 下：
 <div align="center">
 <img src="./demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 ### 3.2 Python
@@ -202,7 +202,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
@@ -218,7 +218,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -233,7 +233,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
@@ -285,7 +285,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
@@ -303,7 +303,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends2.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -320,7 +320,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)

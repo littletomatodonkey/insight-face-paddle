@@ -129,7 +129,7 @@ def print_config(args):
     print("{}".format("-" * width))
     print("PaddleFace".center(width))
     print(table)
-    print("Powered by PaddlePaddle!".rjust(width))
+    print("Powered by PaddlePaddle!".center(width))
     print("{}".format("-" * width))
 
 
@@ -150,11 +150,11 @@ def download_with_progressbar(url, save_path):
     if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes or not os.path.isfile(
             save_path):
         raise Exception(
-            f"Something went wrong while downloading model/image from {url}")
+            f'Something went wrong while downloading model/image from "{url}"')
 
 
 def check_model_file(model):
-    """Check the model files exist and download and untar when no exist. 
+    """Check the model files exist and download and untar when no exist.
     """
     model_map = {
         "ArcFace": "arcface_iresnet50_v1.0_infer",
@@ -303,7 +303,7 @@ class ImageReader(object):
                     )
             else:
                 raise Exception(
-                    f"The file of input path not exist! Please check input: {inputs}"
+                    f'The file of input path not exist! Please check input: "{inputs}"'
                 )
 
     def __iter__(self):
@@ -321,7 +321,7 @@ class ImageReader(object):
         _, file_name = os.path.split(path)
         img = cv2.imread(path)
         if img is None:
-            logging.warning(f"Error in reading image: {path}! Ignored.")
+            logging.warning(f'Error in reading image: "{path}"! Ignored.')
             self.idx += 1
             return self.__next__()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -342,7 +342,7 @@ class VideoReader(object):
             )
         if not os.path.isfile(inputs):
             raise Exception(
-                f"The file of input path not exist! Please check input: {inputs}"
+                f'The file of input path not exist! Please check input: "{inputs}"'
             )
         self.capture = cv2.VideoCapture(inputs)
         self.file_name = os.path.split(inputs)[-1]
@@ -732,7 +732,10 @@ class InsightFace(object):
                 "features": np_feature,
                 "labels": labels
             }
-        logging.info(f"Predict complete!")
+        completion_tip = "Predict complete! "
+        if self.args.output:
+            completion_tip += f'All prediction result(s) have been saved in "{self.args.output}".'
+        logging.info(completion_tip)
 
     def build_index(self):
         img_dir = self.args.img_dir
@@ -755,10 +758,12 @@ class InsightFace(object):
 
             if idx % 100 == 0:
                 logging.info(f"Build idx: {idx}")
-        logging.info(f"Build done. Total {len(label_list)}.")
 
         with open(self.args.build_index, 'wb') as f:
             pickle.dump({"label": label_list, "feature": feature_list}, f)
+        logging.info(
+            f'Build done. Total {len(label_list)}. Index file has been saved in "{self.args.build_index}"'
+        )
 
 
 # for CLI

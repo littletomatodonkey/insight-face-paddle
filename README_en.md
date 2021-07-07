@@ -107,17 +107,17 @@ Use the image below to predict:
 
 The prediction command:
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./output
 ```
 
-The result is under the directory `./demo/friends/output`:
+The result is under the directory `./output`:
 <div align="center">
 <img src="./demo/friends/output/friends1.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 2. Recognition only
@@ -150,17 +150,17 @@ Use the image below to predict:
 
 The prediction command:
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./output
 ```
 
-The result is under the directory `./demo/friends/output`:
+The result is under the directory `./output`:
 <div align="center">
 <img src="./demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 ### 3.2 Python
@@ -203,7 +203,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
@@ -219,7 +219,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -228,7 +228,7 @@ res = predictor.predict(img)
 print(next(res))
 ```
 
-The prediction result saved as `"./demo/friends/output/tmp.png"`.
+The prediction result saved as `"./output/tmp.png"`.
 
 * Video
 ```python
@@ -236,7 +236,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
@@ -288,7 +288,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
@@ -306,7 +306,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends2.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -315,7 +315,7 @@ res = predictor.predict(img, print_info=True)
 next(res)
 ```
 
-The prediction result saved as `"./demo/friends/output/tmp.png"`.
+The prediction result saved as `"./output/tmp.png"`.
 
 * Video
 ```python
@@ -325,7 +325,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
