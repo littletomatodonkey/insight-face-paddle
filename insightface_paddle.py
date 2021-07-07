@@ -629,12 +629,11 @@ class InsightFace(object):
             model_file_path, params_file_path = check_model_file(
                 args.rec_model)
             if not (args.build_index or os.path.isfile(args.index)):
-                warning_str = f"The index file not found! Please check input: \"{args.index}\". "
+                warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
                 if args.det:
                     logging.warning(warning_str + "Detection only!")
                 else:
-                    logging.error(warning_str + "Exit!")
-                    exit(-1)
+                    raise Exception(warning_str)
             else:
                 rec_config = {
                     "max_batch_size": args.max_batch_size,
