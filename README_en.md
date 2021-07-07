@@ -1,9 +1,26 @@
 [简体中文](README_ch.md) | English
 
+------------------------------------------------------------------------------------------
+
+<p align="left">
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/releases"><img src="https://img.shields.io/github/v/release/littletomatodonkey/insight-face-paddle?color=ffa"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.7+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
+    <a href=""><img src="https://img.shields.io/pypi/format/insightface-paddle?color=c77"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/graphs/contributors"><img src="https://img.shields.io/github/contributors/littletomatodonkey/insight-face-paddle?color=9ea"></a>
+    <a href="https://pypi.org/project/insightface-paddle/"><img src="https://img.shields.io/pypi/dm/insightface-paddle?color=9cf"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/stargazers"><img src="https://img.shields.io/github/stars/littletomatodonkey/insight-face-paddle?color=ccf"></a>
+</p>
+
 # InsightFace Paddle
 
 ## 1. Introduction
-`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition. One example result predicted by `InsightFacePaddle` is as follow. Please refer to the [Demo](./demo/friends/output/) for more.
+
+<div align="center">
+<img src="./demo/friends/output/friends3.jpg"  width = "800" />
+</div>
 
 ## 2. Installation
 1. Install PaddlePaddle
@@ -73,8 +90,8 @@ The args are as follows:
 | det_thresh | float | 0.8 | The threshold of detection postprocess. Default by `0.8`. |
 | rec | bool | False | Whether to recognize. |
 | index | str | - | The path of index file. |
-| cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by `10`. |
-| rec_thresh | float | 0.4 | The threshold of match in recognition, use to remove candidates with low similarity. Default by `0.4`. |
+| cdd_num | int | 5 | The number of candidates in the recognition retrieval. Default by `5`. |
+| rec_thresh | float | 0.45 | The threshold of match in recognition, use to remove candidates with low similarity. Default by `0.45`. |
 | max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by `1`. |
 | build_index | str | - | The path of index to be build. |
 | img_dir | str | - | The img(s) dir used to build index. |
@@ -107,17 +124,17 @@ Use the image below to predict:
 
 The prediction command:
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./output
 ```
 
-The result is under the directory `./demo/friends/output`:
+The result is under the directory `./output`:
 <div align="center">
 <img src="./demo/friends/output/friends1.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 2. Recognition only
@@ -150,17 +167,17 @@ Use the image below to predict:
 
 The prediction command:
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./output
 ```
 
-The result is under the directory `./demo/friends/output`:
+The result is under the directory `./output`:
 <div align="center">
 <img src="./demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 ### 3.2 Python
@@ -203,7 +220,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
@@ -219,7 +236,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -228,7 +245,7 @@ res = predictor.predict(img)
 print(next(res))
 ```
 
-The prediction result saved as `"./demo/friends/output/tmp.png"`.
+The prediction result saved as `"./output/tmp.png"`.
 
 * Video
 ```python
@@ -236,7 +253,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
@@ -288,7 +305,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
@@ -306,7 +323,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends2.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -315,7 +332,7 @@ res = predictor.predict(img, print_info=True)
 next(res)
 ```
 
-The prediction result saved as `"./demo/friends/output/tmp.png"`.
+The prediction result saved as `"./output/tmp.png"`.
 
 * Video
 ```python
@@ -325,7 +342,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)

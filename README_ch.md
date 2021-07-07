@@ -1,9 +1,27 @@
 简体中文 | [English](README_en.md)
 
+------------------------------------------------------------------------------------------
+
+<p align="left">
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/releases"><img src="https://img.shields.io/github/v/release/littletomatodonkey/insight-face-paddle?color=ffa"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.7+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
+    <a href=""><img src="https://img.shields.io/pypi/format/insightface-paddle?color=c77"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/graphs/contributors"><img src="https://img.shields.io/github/contributors/littletomatodonkey/insight-face-paddle?color=9ea"></a>
+    <a href="https://pypi.org/project/insightface-paddle/"><img src="https://img.shields.io/pypi/dm/insightface-paddle?color=9cf"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/stargazers"><img src="https://img.shields.io/github/stars/littletomatodonkey/insight-face-paddle?color=ccf"></a>
+</p>
+
 # InsightFace Paddle
 
 ## 1. 介绍
-`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
+`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。 基于 `InsightFacePaddle` 的预测结果，示例如下，更多示例结果请参考 [示例](./demo/friends/output/)。
+
+<div align="center">
+<img src="./demo/friends/output/friends3.jpg"  width = "800" />
+</div>
+
 
 ## 2. 安装
 1. 安装 PaddlePaddle
@@ -73,8 +91,8 @@ insightfacepaddle -h
 | det_thresh | float | 0.8 | 检测后处理的阈值，默认值为`0.8`。 |
 | rec | bool | False | 是否进行识别。 |
 | index | str | - | 索引文件的路径。 |
-| cdd_num | int | 10 | 识别中检索阶段的候选数量，默认值为`10`。 |
-| rec_thresh | float | 0.4 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为`0.4`。 |
+| cdd_num | int | 5 | 识别中检索阶段的候选数量，默认值为`5`。 |
+| rec_thresh | float | 0.45 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为`0.45`。 |
 | max_batch_size | int | 1 | 识别中 batch_size 上限，默认值为`1`。 |
 | build_index | str | - | 要构建的索引文件路径。 |
 | img_dir | str | - | 用于构建索引的图像文件目录。 |
@@ -107,17 +125,17 @@ insightfacepaddle --build_index ./demo/friends/index.bin --img_dir ./demo/friend
 
 预测命令如下：
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends1.jpg --output ./output
 ```
 
-检测结果图位于路径 `./demo/friends/output` 下：
+检测结果图位于路径 `./output` 下：
 <div align="center">
 <img src="./demo/friends/output/friends1.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 2. 仅识别
@@ -149,17 +167,17 @@ INFO:root:File: Rachel.png, predict label(s): ['Rachel']
 
 预测命令如下：
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends2.jpg --output ./output
 ```
 
-检测结果图位于路径 `./demo/friends/output` 下：
+检测结果图位于路径 `./output` 下：
 <div align="center">
 <img src="./demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
 * Video
 ```bash
-insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./demo/friends/output
+insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
 ### 3.2 Python
@@ -202,7 +220,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
@@ -218,7 +236,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -233,7 +251,7 @@ parser = face.parser()
 args = parser.parse_args()
 
 args.det = True
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
@@ -285,7 +303,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
@@ -303,7 +321,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 path = "./demo/friends/query/friends2.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
@@ -320,7 +338,7 @@ args = parser.parse_args()
 args.det = True
 args.rec = True
 args.index = "./demo/friends/index.bin"
-args.output = "./demo/friends/output"
+args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
