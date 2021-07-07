@@ -1,4 +1,4 @@
 include LICENSE
 include README_en.md
 include requirements.txt
-include simfang.ttf
+include SourceHanSansCN-Medium.otf
