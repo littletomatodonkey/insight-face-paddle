@@ -73,7 +73,10 @@ def parser(add_help=True):
         type=str,
         help="The path or directory of image(s) or video to be predicted.")
     parser.add_argument(
-        "--output", type=str, help="The directory of prediction result.")
+        "--output",
+        type=str,
+        default="./output/",
+        help="The directory of prediction result.")
     parser.add_argument(
         "--det", action="store_true", help="Whether to detect.")
     parser.add_argument(
@@ -122,7 +125,7 @@ def parser(add_help=True):
 
 def print_config(args):
     args = vars(args)
-    table = PrettyTable(['Param', 'Value'])
+    table = PrettyTable(["Param", "Value"])
     for param in args:
         table.add_row([param, args[param]])
     width = len(str(table).split("\n")[0])
@@ -150,7 +153,8 @@ def download_with_progressbar(url, save_path):
     if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes or not os.path.isfile(
             save_path):
         raise Exception(
-            f'Something went wrong while downloading model/image from "{url}"')
+            f"Something went wrong while downloading model/image from \"{url}\""
+        )
 
 
 def check_model_file(model):
@@ -168,7 +172,7 @@ def check_model_file(model):
         if not os.path.exists(model_file_path) or not os.path.exists(
                 params_file_path):
             raise Exception(
-                f"The specifed model directory error. The drectory must include 'inference.pdmodel' and 'inference.pdiparams'."
+                f"The specifed model directory error. The drectory must include \"inference.pdmodel\" and \"inference.pdiparams\"."
             )
 
     elif model in model_map:
@@ -207,28 +211,29 @@ def check_model_file(model):
             )
     else:
         raise Exception(
-            f"The specifed model name error. Support 'BlazeFace' for detection and 'ArcFace' and 'MobileFace' for recognition. And support local directory that include model files ('inference.pdmodel' and 'inference.pdiparams')."
+            f"The specifed model name error. Support \"BlazeFace\" for detection and \"ArcFace\" and \"MobileFace\" for recognition. And support local directory that include model files (\"inference.pdmodel\" and \"inference.pdiparams\")."
         )
 
     return model_file_path, params_file_path
 
 
-def normalize_image(img, scale=None, mean=None, std=None, order='chw'):
+def normalize_image(img, scale=None, mean=None, std=None, order="chw"):
     if isinstance(scale, str):
         scale = eval(scale)
     scale = np.float32(scale if scale is not None else 1.0 / 255.0)
     mean = mean if mean is not None else [0.485, 0.456, 0.406]
     std = std if std is not None else [0.229, 0.224, 0.225]
 
-    shape = (3, 1, 1) if order == 'chw' else (1, 1, 3)
-    mean = np.array(mean).reshape(shape).astype('float32')
-    std = np.array(std).reshape(shape).astype('float32')
+    shape = (3, 1, 1) if order == "chw" else (1, 1, 3)
+    mean = np.array(mean).reshape(shape).astype("float32")
+    std = np.array(std).reshape(shape).astype("float32")
 
     if isinstance(img, Image.Image):
         img = np.array(img)
 
-    assert isinstance(img, np.ndarray), "invalid input 'img' in NormalizeImage"
-    return (img.astype('float32') * scale - mean) / std
+    assert isinstance(img,
+                      np.ndarray), "invalid input \"img\" in NormalizeImage"
+    return (img.astype("float32") * scale - mean) / std
 
 
 def to_CHW_image(img):
@@ -277,7 +282,7 @@ class ImageReader(object):
         if isinstance(inputs, np.ndarray):
             self.image_list = [inputs]
         else:
-            imgtype_list = {'jpg', 'bmp', 'png', 'jpeg', 'rgb', 'tif', 'tiff'}
+            imgtype_list = {"jpg", "bmp", "png", "jpeg", "rgb", "tif", "tiff"}
             self.image_list = []
             if os.path.isfile(inputs):
                 if imghdr.what(inputs) not in imgtype_list:
@@ -303,7 +308,7 @@ class ImageReader(object):
                     )
             else:
                 raise Exception(
-                    f'The file of input path not exist! Please check input: "{inputs}"'
+                    f"The file of input path not exist! Please check input: \"{inputs}\""
                 )
 
     def __iter__(self):
@@ -321,7 +326,7 @@ class ImageReader(object):
         _, file_name = os.path.split(path)
         img = cv2.imread(path)
         if img is None:
-            logging.warning(f'Error in reading image: "{path}"! Ignored.')
+            logging.warning(f"Error in reading image: \"{path}\"! Ignored.")
             self.idx += 1
             return self.__next__()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -342,7 +347,7 @@ class VideoReader(object):
             )
         if not os.path.isfile(inputs):
             raise Exception(
-                f'The file of input path not exist! Please check input: "{inputs}"'
+                f"The file of input path not exist! Please check input: \"{inputs}\""
             )
         self.capture = cv2.VideoCapture(inputs)
         self.file_name = os.path.split(inputs)[-1]
@@ -351,11 +356,11 @@ class VideoReader(object):
         info = {}
         width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(* 'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(* "mp4v")
         info["file_name"] = self.file_name
         info["fps"] = 30
         info["shape"] = (width, height)
-        info["fourcc"] = cv2.VideoWriter_fourcc(* 'mp4v')
+        info["fourcc"] = cv2.VideoWriter_fourcc(* "mp4v")
         return info
 
     def __iter__(self):
@@ -394,7 +399,7 @@ class VideoWriter(object):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         output_path = os.path.join(output_dir, video_info["file_name"])
-        fourcc = cv2.VideoWriter_fourcc(* 'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(* "mp4v")
         self.writer = cv2.VideoWriter(output_path, video_info["fourcc"],
                                       video_info["fps"], video_info["shape"])
 
@@ -470,7 +475,7 @@ class Detector(BasePredictor):
             scale=1. / 255.,
             mean=[0.485, 0.456, 0.406],
             std=[0.229, 0.224, 0.225],
-            order='hwc')
+            order="hwc")
         img_info = {}
         img_info["im_shape"] = np.array(
             img.shape[:2], dtype=np.float32)[np.newaxis, :]
@@ -520,7 +525,7 @@ class Recognizer(BasePredictor):
             scale=1. / 255.,
             mean=[0.5, 0.5, 0.5],
             std=[0.5, 0.5, 0.5],
-            order='hwc')
+            order="hwc")
         if box_list is None:
             height, width = img.shape[:2]
             box_list = [np.array([0, 0, 0, 0, width, height])]
@@ -687,7 +692,7 @@ class InsightFace(object):
             if hasattr(self, "det_predictor"):
                 self.output_writer = ImageWriter(self.args.output)
         elif isinstance(input_data, str):
-            if input_data.endswith('mp4'):
+            if input_data.endswith("mp4"):
                 self.input_reader = VideoReader(input_data)
                 info = self.input_reader.get_info()
                 self.output_writer = VideoWriter(self.args.output, info)
@@ -734,7 +739,7 @@ class InsightFace(object):
             }
         completion_tip = "Predict complete! "
         if self.args.output:
-            completion_tip += f'All prediction result(s) have been saved in "{self.args.output}".'
+            completion_tip += f"All prediction result(s) have been saved in \"{self.args.output}\"."
         logging.info(completion_tip)
 
     def build_index(self):
@@ -759,10 +764,10 @@ class InsightFace(object):
             if idx % 100 == 0:
                 logging.info(f"Build idx: {idx}")
 
-        with open(self.args.build_index, 'wb') as f:
+        with open(self.args.build_index, "wb") as f:
             pickle.dump({"label": label_list, "feature": feature_list}, f)
         logging.info(
-            f'Build done. Total {len(label_list)}. Index file has been saved in "{self.args.build_index}"'
+            f"Build done. Total {len(label_list)}. Index file has been saved in \"{self.args.build_index}\""
         )
 
 
