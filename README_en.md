@@ -1,5 +1,18 @@
 [简体中文](README_ch.md) | English
 
+------------------------------------------------------------------------------------------
+
+<p align="left">
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/releases"><img src="https://img.shields.io/github/v/release/littletomatodonkey/insight-face-paddle?color=ffa"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.7+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
+    <a href=""><img src="https://img.shields.io/pypi/format/insightface-paddle?color=c77"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/graphs/contributors"><img src="https://img.shields.io/github/contributors/littletomatodonkey/insight-face-paddle?color=9ea"></a>
+    <a href="https://pypi.org/project/insightface-paddle/"><img src="https://img.shields.io/pypi/dm/insightface-paddle?color=9cf"></a>
+    <a href="https://github.com/littletomatodonkey/insight-face-paddle/stargazers"><img src="https://img.shields.io/github/stars/littletomatodonkey/insight-face-paddle?color=ccf"></a>
+</p>
+
 # InsightFace Paddle
 
 ## 1. Introduction
