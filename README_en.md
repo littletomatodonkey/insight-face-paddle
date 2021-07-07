@@ -16,7 +16,11 @@
 # InsightFace Paddle
 
 ## 1. Introduction
-`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition. One example result predicted by `InsightFacePaddle` is as follow. Please refer to the [Demo](./demo/friends/output/) for more.
+
+<div align="center">
+<img src="./demo/friends/output/friends3.jpg"  width = "800" />
+</div>
 
 ## 2. Installation
 1. Install PaddlePaddle
@@ -86,8 +90,8 @@ The args are as follows:
 | det_thresh | float | 0.8 | The threshold of detection postprocess. Default by `0.8`. |
 | rec | bool | False | Whether to recognize. |
 | index | str | - | The path of index file. |
-| cdd_num | int | 10 | The number of candidates in the recognition retrieval. Default by `10`. |
-| rec_thresh | float | 0.4 | The threshold of match in recognition, use to remove candidates with low similarity. Default by `0.4`. |
+| cdd_num | int | 5 | The number of candidates in the recognition retrieval. Default by `5`. |
+| rec_thresh | float | 0.45 | The threshold of match in recognition, use to remove candidates with low similarity. Default by `0.45`. |
 | max_batch_size | int | 1 | The maxium of batch_size to recognize. Default by `1`. |
 | build_index | str | - | The path of index to be build. |
 | img_dir | str | - | The img(s) dir used to build index. |

@@ -91,14 +91,14 @@ def parser(add_help=True):
     parser.add_argument(
         "--cdd_num",
         type=int,
-        default=10,
-        help="The number of candidates in the recognition retrieval. Default by 10."
+        default=5,
+        help="The number of candidates in the recognition retrieval. Default by 5."
     )
     parser.add_argument(
         "--rec_thresh",
         type=float,
-        default=0.4,
-        help="The threshold of recognition postprocess. Default by 0.4.")
+        default=0.45,
+        help="The threshold of recognition postprocess. Default by 0.45.")
     parser.add_argument(
         "--max_batch_size",
         type=int,
@@ -628,17 +628,25 @@ class InsightFace(object):
         if args.rec:
             model_file_path, params_file_path = check_model_file(
                 args.rec_model)
-            rec_config = {
-                "max_batch_size": args.max_batch_size,
-                "resize": 112,
-                "thresh": args.rec_thresh,
-                "index": args.index,
-                "build_index": args.build_index,
-                "cdd_num": args.cdd_num
-            }
-            predictor_config["model_file"] = model_file_path
-            predictor_config["params_file"] = params_file_path
-            self.rec_predictor = Recognizer(rec_config, predictor_config)
+            if not (args.build_index or os.path.isfile(args.index)):
+                warning_str = f"The index file not found! Please check input: \"{args.index}\". "
+                if args.det:
+                    logging.warning(warning_str + "Detection only!")
+                else:
+                    logging.error(warning_str + "Exit!")
+                    exit(-1)
+            else:
+                rec_config = {
+                    "max_batch_size": args.max_batch_size,
+                    "resize": 112,
+                    "thresh": args.rec_thresh,
+                    "index": args.index,
+                    "build_index": args.build_index,
+                    "cdd_num": args.cdd_num
+                }
+                predictor_config["model_file"] = model_file_path
+                predictor_config["params_file"] = params_file_path
+                self.rec_predictor = Recognizer(rec_config, predictor_config)
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)

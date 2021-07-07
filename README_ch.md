@@ -16,7 +16,12 @@
 # InsightFace Paddle
 
 ## 1. 介绍
-`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
+`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。 基于 `InsightFacePaddle` 的预测结果，示例如下，更多示例结果请参考 [示例](./demo/friends/output/)。
+
+<div align="center">
+<img src="./demo/friends/output/friends3.jpg"  width = "800" />
+</div>
+
 
 ## 2. 安装
 1. 安装 PaddlePaddle
@@ -86,8 +91,8 @@ insightfacepaddle -h
 | det_thresh | float | 0.8 | 检测后处理的阈值，默认值为`0.8`。 |
 | rec | bool | False | 是否进行识别。 |
 | index | str | - | 索引文件的路径。 |
-| cdd_num | int | 10 | 识别中检索阶段的候选数量，默认值为`10`。 |
-| rec_thresh | float | 0.4 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为`0.4`。 |
+| cdd_num | int | 5 | 识别中检索阶段的候选数量，默认值为`5`。 |
+| rec_thresh | float | 0.45 | 识别中的检索阈值，由于剔除相似度过低的候选项。默认值为`0.45`。 |
 | max_batch_size | int | 1 | 识别中 batch_size 上限，默认值为`1`。 |
 | build_index | str | - | 要构建的索引文件路径。 |
 | img_dir | str | - | 用于构建索引的图像文件目录。 |
