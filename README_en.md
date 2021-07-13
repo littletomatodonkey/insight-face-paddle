@@ -16,7 +16,48 @@
 # InsightFace Paddle
 
 ## 1. Introduction
-`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition. One example result predicted by `InsightFacePaddle` is as follow. Please refer to the [Demo](./demo/friends/output/) for more.
+
+## 1.1 Overview
+
+`InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+
+
+- This tutorial is mainly about Whl package inference using `PaddleInfernence`.
+- For face recognition task, please refer to: [Face recognition tuturial](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_paddle/README_en.md).
+- For face detection task, please refer to: [Face detection tuturial](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_en.md).
+
+
+### 1.2 Benchmark
+
+For face detection task, on WiderFace dataset, the following table shows mAP, speed and time cost for BlazeFace.
+
+| Model structure                  | Model size | WiderFace mAP   | CPU time cost | GPU time cost |
+| ------------------------- | ----- | ----- | -------- | -------- |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.9187/0.8979/0.8168 | 31.7ms  |  5.6ms |
+| RetinaFace      | 1.68MB | -/-/0.825 | 182.0ms  | 17.4ms |
+
+
+For face recognition task, on MSAM dataset, the following table shows precision, speed and time cost for MobileFaceNet.
+
+
+| Model structure           | lfw   | cfp_fp | agedb30  | CPU time cost | GPU time cost |
+| ------------------------- | ----- | ------ | ------- | -------| -------- |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613 | 4.3ms | 2.3ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
+
+
+**Benchmark environment:**
+* CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+* GPU: a single NVIDIA Tesla V100
+
+
+**Note:** Performance of `RetinaFace` is tested using script [test.py](https://github.com/deepinsight/insightface/blob/master/detection/retinaface/test.py). The image shape is modified to `640x480` here. Performance of `MobileFaceNet-mxnet` if tested using script [verification.py](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_mxnet/verification.py).
+
+
+### 1.3 Visualization
+
+One example result predicted by `InsightFacePaddle` is as follow. Please refer to the [Demo](./demo/friends/output/) for more.
+
 
 <div align="center">
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />

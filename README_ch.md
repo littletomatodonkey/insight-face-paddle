@@ -16,7 +16,45 @@
 # InsightFace Paddle
 
 ## 1. 介绍
-`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。 基于 `InsightFacePaddle` 的预测结果，示例如下，更多示例结果请参考 [示例](./demo/friends/output/)。
+
+### 1.1 总览
+`InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
+
+- 本部分内容为Whl包预测部署部分。
+- 人脸识别相关内容可以参考：[人脸识别](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_paddle/README_ch.md)。
+- 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_ch.md)。
+
+Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
+
+
+### 1.2 模型benchmark
+
+在人脸检测任务中，在WiderFace数据集上，BlazeFace的速度与精度指标信息如下。
+
+| 模型结构                  | 模型大小 | WiderFace精度   | CPU 耗时 | GPU 耗时 |
+| ------------------------- | ----- | ----- | -------- | -------- |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.9187/0.8979/0.8168 | 31.7ms  |  5.6ms |
+| RetinaFace      | 1.68MB | -/-/0.825 | 182.0ms  | 17.4ms |
+
+在人脸识别任务中，基于MS1M训练集，模型指标在lfw、cfp_fp、agedb30上的精度指标以及CPU、GPU的预测耗时如下。
+
+| 模型结构                  | lfw   | cfp_fp | agedb30  | CPU 耗时 | GPU 耗时 |
+| ------------------------- | ----- | ------ | ------- | -------| -------- |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613 | 4.3ms | 2.3ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
+
+
+**测试环境：**
+* CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+* GPU: a single NVIDIA Tesla V100
+
+**注：** `RetinaFace`的性能数据是使用脚本[test.py](https://github.com/deepinsight/insightface/blob/master/detection/retinaface/test.py)测试得到，这里将`RetinaFace`的image shape修改为`640x480`进行测试。`MobileFaceNet-mxnet`的性能数据是使用脚本：[verification.py](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_mxnet/verification.py)测试得到。
+
+
+### 1.3 可视化结果展示
+
+基于 `InsightFacePaddle` 的预测结果，示例如下，更多示例结果请参考 [示例](./demo/friends/output/)。
+
 
 <div align="center">
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
