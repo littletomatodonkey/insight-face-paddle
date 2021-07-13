@@ -626,26 +626,38 @@ class InsightFace(object):
             self.color_map = ColorMap(100)
 
         if args.rec:
+            if args.build_index:
+                warning_str = f"Only one of --rec and --build_index can be set!"
+                raise Exception(warning_str)
+
             model_file_path, params_file_path = check_model_file(
                 args.rec_model)
-            if not (args.build_index or os.path.isfile(args.index)):
-                warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
+            if args.index:
+                if os.path.isfile(args.index):
+                    rec_config = {
+                        "max_batch_size": args.max_batch_size,
+                        "resize": 112,
+                        "thresh": args.rec_thresh,
+                        "index": args.index,
+                        "build_index": args.build_index,
+                        "cdd_num": args.cdd_num
+                    }
+                    predictor_config["model_file"] = model_file_path
+                    predictor_config["params_file"] = params_file_path
+                    self.rec_predictor = Recognizer(rec_config,
+                                                    predictor_config)
+                else:
+                    warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
+                    if args.det:
+                        logging.warning(warning_str + "Detection only!")
+                    else:
+                        raise Exception(warning_str)
+            else:
+                warning_str = f"The index file must be specified when recognition! "
                 if args.det:
                     logging.warning(warning_str + "Detection only!")
                 else:
                     raise Exception(warning_str)
-            else:
-                rec_config = {
-                    "max_batch_size": args.max_batch_size,
-                    "resize": 112,
-                    "thresh": args.rec_thresh,
-                    "index": args.index,
-                    "build_index": args.build_index,
-                    "cdd_num": args.cdd_num
-                }
-                predictor_config["model_file"] = model_file_path
-                predictor_config["params_file"] = params_file_path
-                self.rec_predictor = Recognizer(rec_config, predictor_config)
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)
@@ -787,7 +799,6 @@ def main(args=None):
     if args.build_index:
         predictor.build_index()
     else:
-        predictor.predict(args.input)
         res = predictor.predict(args.input, print_info=True)
         for _ in res:
             pass
