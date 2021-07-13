@@ -51,7 +51,7 @@ For face recognition task, on MSAM dataset, the following table shows precision,
 * GPU: a single NVIDIA Tesla V100
 
 
-**Note:** Performance of `RetinaFace` is tested using script [test.py](https://github.com/deepinsight/insightface/blob/master/detection/retinaface/test.py). The image shape is modified to `640x480` here. Performance of `MobileFaceNet-mxnet` if tested using script [verification.py](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_mxnet/verification.py).
+**Note:** Performance of `RetinaFace` is tested using script [test.py](https://github.com/deepinsight/insightface/blob/master/detection/retinaface/test.py). The image shape is modified to `640x480` here. Performance of `MobileFaceNet-mxnet` is tested using script [verification.py](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_mxnet/verification.py).
 
 
 ### 1.3 Visualization
