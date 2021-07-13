@@ -17,7 +17,7 @@
 
 ## 1. Introduction
 
-## 1.1 Overview
+### 1.1 Overview
 
 `InsightFacePaddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `InsightFacePaddle` provide three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
 
