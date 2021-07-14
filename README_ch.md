@@ -59,7 +59,7 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
 </div>
 
-### 1.4 欢迎加入InsightFacePaddle技术交流群
+### 1.4 欢迎加入飞桨模型交流群
 
 QQ扫描二维码加入官方交流群（群号：`705899115`），获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 
