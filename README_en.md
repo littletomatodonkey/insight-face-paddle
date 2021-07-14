@@ -65,7 +65,7 @@ One example result predicted by `InsightFacePaddle` is as follow. Please refer t
 
 ### 1.4 Community
 
-Scan the QR code below with your QQ (QQ group number: `705899115`), and you can access to official technical exchange group. Look forward to your participation.
+Scan the QR code below with your QQ (QQ group number: `705899115`), and you can access to PaddlePaddle models' technical exchange group. Look forward to your participation.
 
 <div align="center">
 <img src="./qq_group.jpeg"  width = "300" />
