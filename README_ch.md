@@ -26,7 +26,6 @@
 
 Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
 
-
 ### 1.2 模型benchmark
 
 在人脸检测任务中，在WiderFace数据集上，BlazeFace的速度与精度指标信息如下。
@@ -60,6 +59,13 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
 </div>
 
+### 1.4 欢迎加入InsightFacePaddle技术交流群
+
+QQ扫描二维码加入官方交流群（群号：`705899115`），获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+
+<div align="center">
+<img src="./qq_group.jpeg"  width = "300" />
+</div>
 
 ## 2. 安装
 1. 安装 PaddlePaddle
