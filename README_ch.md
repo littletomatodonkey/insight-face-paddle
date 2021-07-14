@@ -59,9 +59,9 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
 </div>
 
-### 1.4 欢迎加入飞桨模型交流群
+### 1.4 欢迎加入深度学习技术交流群
 
-QQ扫描二维码加入飞桨模型交流群（群号：`705899115`），获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+QQ扫描二维码加入交流群（群号：`705899115`）。
 
 <div align="center">
 <img src="./qq_group.jpeg"  width = "300" />
