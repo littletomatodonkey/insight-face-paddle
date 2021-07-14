@@ -58,10 +58,19 @@ For face recognition task, on MSAM dataset, the following table shows precision,
 
 One example result predicted by `InsightFacePaddle` is as follow. Please refer to the [Demo](./demo/friends/output/) for more.
 
-
 <div align="center">
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
 </div>
+
+
+### 1.4 Community
+
+Scan the QR code below with your QQ (QQ group number: `705899115`), and you can access to official technical exchange group. Look forward to your participation.
+
+<div align="center">
+<img src="./qq_group.jpeg"  width = "300" />
+</div>
+
 
 ## 2. Installation
 1. Install PaddlePaddle
