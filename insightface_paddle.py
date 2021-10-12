@@ -19,6 +19,7 @@ import logging
 import imghdr
 import pickle
 import tarfile
+import copy
 from functools import partial
 
 import cv2
@@ -600,6 +601,9 @@ class InsightFace(object):
             print_config(args)
 
         if args.build_index:
+            if args.rec:
+                warning_str = f"Only one of --rec and --build_index can be set!"
+                raise Exception(warning_str)
             if args.img_dir is None or args.label is None:
                 raise Exception(
                     "Please specify the --img_dir and --label when build index."
@@ -620,44 +624,43 @@ class InsightFace(object):
             model_file_path, params_file_path = check_model_file(
                 args.det_model)
             det_config = {"thresh": args.det_thresh, "target_size": [640, 640]}
-            predictor_config["model_file"] = model_file_path
-            predictor_config["params_file"] = params_file_path
-            self.det_predictor = Detector(det_config, predictor_config)
+            det_predictor_config = copy.deepcopy(predictor_config)
+            det_predictor_config["model_file"] = model_file_path
+            det_predictor_config["params_file"] = params_file_path
+            self.det_predictor = Detector(det_config, det_predictor_config)
             self.color_map = ColorMap(100)
 
         if args.rec:
-            if args.build_index:
-                warning_str = f"Only one of --rec and --build_index can be set!"
-                raise Exception(warning_str)
-
             model_file_path, params_file_path = check_model_file(
                 args.rec_model)
-            if args.index:
-                if os.path.isfile(args.index):
-                    rec_config = {
-                        "max_batch_size": args.max_batch_size,
-                        "resize": 112,
-                        "thresh": args.rec_thresh,
-                        "index": args.index,
-                        "build_index": args.build_index,
-                        "cdd_num": args.cdd_num
-                    }
-                    predictor_config["model_file"] = model_file_path
-                    predictor_config["params_file"] = params_file_path
-                    self.rec_predictor = Recognizer(rec_config,
-                                                    predictor_config)
-                else:
+
+            if not args.build_index:
+                if not args.index:
+                    warning_str = f"The index file must be specified when recognition! "
+                    if args.det:
+                        logging.warning(warning_str + "Detection only!")
+                    else:
+                        raise Exception(warning_str)
+
+                elif not os.path.isfile(args.index):
                     warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
                     if args.det:
                         logging.warning(warning_str + "Detection only!")
                     else:
                         raise Exception(warning_str)
-            else:
-                warning_str = f"The index file must be specified when recognition! "
-                if args.det:
-                    logging.warning(warning_str + "Detection only!")
-                else:
-                    raise Exception(warning_str)
+
+            rec_config = {
+                "max_batch_size": args.max_batch_size,
+                "resize": 112,
+                "thresh": args.rec_thresh,
+                "index": args.index,
+                "build_index": args.build_index,
+                "cdd_num": args.cdd_num
+            }
+            rec_predictor_config = copy.deepcopy(predictor_config)
+            rec_predictor_config["model_file"] = model_file_path
+            rec_predictor_config["params_file"] = params_file_path
+            self.rec_predictor = Recognizer(rec_config, rec_predictor_config)
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)
