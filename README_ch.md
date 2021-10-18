@@ -21,8 +21,8 @@
 `InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
 
 - 本部分内容为Whl包预测部署部分。
-- 人脸识别相关内容可以参考：[人脸识别](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_paddle/README_ch.md)。
-- 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_ch.md)。
+- 人脸识别相关内容可以参考：[人脸识别](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_paddle/README_cn.md)。
+- 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_cn.md)。
 
 Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
 
