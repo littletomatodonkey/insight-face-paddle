@@ -19,7 +19,6 @@ import logging
 import imghdr
 import pickle
 import tarfile
-import copy
 from functools import partial
 
 import cv2
@@ -592,75 +591,86 @@ class Recognizer(BasePredictor):
 class InsightFace(object):
     def __init__(self, args, print_info=True):
         super().__init__()
-        if not (args.det or args.rec) and not args.build_index:
-            raise Exception(
-                "Specify at least the detection(--det) or recognition(--rec) or --build_index!"
-            )
+
+        self.args = args
+
+        self.font_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            "SourceHanSansCN-Medium.otf")
 
         if print_info:
             print_config(args)
 
+        # build index
         if args.build_index:
-            if args.rec:
-                warning_str = f"Only one of --rec and --build_index can be set!"
+            if args.rec or args.det:
+                warning_str = f"Only one of --rec (or --det) and --build_index can be set!"
                 raise Exception(warning_str)
             if args.img_dir is None or args.label is None:
                 raise Exception(
                     "Please specify the --img_dir and --label when build index."
                 )
-            args.det, args.rec = False, True
+            self.init_rec(args)
 
-        self.font_path = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            "SourceHanSansCN-Medium.otf")
-        self.args = args
+        # detection
+        if args.det:
+            self.init_det(args)
 
-        predictor_config = {
+        # recognition
+        if args.rec:
+            if not args.index:
+                warning_str = f"The index file must be specified when recognition! "
+                if args.det:
+                    logging.warning(warning_str + "Detection only!")
+                else:
+                    raise Exception(warning_str)
+            elif not os.path.isfile(args.index):
+                warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
+                if args.det:
+                    logging.warning(warning_str + "Detection only!")
+                else:
+                    raise Exception(warning_str)
+            else:
+                self.init_rec(args)
+
+        if not args.build_index and not args.det and not args.rec:
+            raise Exception(
+                "Specify at least the detection(--det) or recognition(--rec) or --build_index!"
+            )
+
+    def init_rec(self, args):
+        rec_config = {
+            "max_batch_size": args.max_batch_size,
+            "resize": 112,
+            "thresh": args.rec_thresh,
+            "index": args.index,
+            "build_index": args.build_index,
+            "cdd_num": args.cdd_num
+        }
+        rec_predictor_config = {
             "use_gpu": args.use_gpu,
             "enable_mkldnn": args.enable_mkldnn,
             "cpu_threads": args.cpu_threads
         }
-        if args.det:
-            model_file_path, params_file_path = check_model_file(
-                args.det_model)
-            det_config = {"thresh": args.det_thresh, "target_size": [640, 640]}
-            det_predictor_config = copy.deepcopy(predictor_config)
-            det_predictor_config["model_file"] = model_file_path
-            det_predictor_config["params_file"] = params_file_path
-            self.det_predictor = Detector(det_config, det_predictor_config)
-            self.color_map = ColorMap(100)
+        model_file_path, params_file_path = check_model_file(args.rec_model)
+        rec_predictor_config["model_file"] = model_file_path
+        rec_predictor_config["params_file"] = params_file_path
+        self.rec_predictor = Recognizer(rec_config, rec_predictor_config)
 
-        if args.rec:
-            model_file_path, params_file_path = check_model_file(
-                args.rec_model)
+    def init_det(self, args):
+        det_config = {"thresh": args.det_thresh, "target_size": [640, 640]}
+        det_predictor_config = {
+            "use_gpu": args.use_gpu,
+            "enable_mkldnn": args.enable_mkldnn,
+            "cpu_threads": args.cpu_threads
+        }
+        model_file_path, params_file_path = check_model_file(args.det_model)
+        det_predictor_config["model_file"] = model_file_path
+        det_predictor_config["params_file"] = params_file_path
+        self.det_predictor = Detector(det_config, det_predictor_config)
 
-            if not args.build_index:
-                if not args.index:
-                    warning_str = f"The index file must be specified when recognition! "
-                    if args.det:
-                        logging.warning(warning_str + "Detection only!")
-                    else:
-                        raise Exception(warning_str)
-
-                elif not os.path.isfile(args.index):
-                    warning_str = f"The index file not found! Please check path of index: \"{args.index}\". "
-                    if args.det:
-                        logging.warning(warning_str + "Detection only!")
-                    else:
-                        raise Exception(warning_str)
-
-            rec_config = {
-                "max_batch_size": args.max_batch_size,
-                "resize": 112,
-                "thresh": args.rec_thresh,
-                "index": args.index,
-                "build_index": args.build_index,
-                "cdd_num": args.cdd_num
-            }
-            rec_predictor_config = copy.deepcopy(predictor_config)
-            rec_predictor_config["model_file"] = model_file_path
-            rec_predictor_config["params_file"] = params_file_path
-            self.rec_predictor = Recognizer(rec_config, rec_predictor_config)
+        # TODO(gaotingquan): now only support fixed number of color
+        self.color_map = ColorMap(100)
 
     def preprocess(self, img):
         img = img.astype(np.float32, copy=False)
