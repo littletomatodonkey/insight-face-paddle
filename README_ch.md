@@ -15,7 +15,23 @@
 
 # InsightFace Paddle
 
+## 目录
+
+* [1. 介绍](#1)
+  * [1.1 总览](#1.1)
+  * [1.2 模型benchmark](1.2)
+  * [1.3 可视化结果展示](1.3)
+  * [1.4 欢迎加入深度学习技术交流群](1.4)
+* [2. 安装](#2)
+* [3. 快速开始](#3)
+  * [3.1 命令行](3.1)
+  * [3.2 Python](3.2)
+
+<a name="1"></a>
+
 ## 1. 介绍
+
+<a name="1.1"></a>
 
 ### 1.1 总览
 `InsightFacePaddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`InsightFacePaddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
@@ -25,6 +41,8 @@
 - 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_cn.md)。
 
 Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
+
+<a name="1.2"></a>
 
 ### 1.2 模型benchmark
 
@@ -50,6 +68,8 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 **注：** `RetinaFace`的性能数据是使用脚本[test.py](https://github.com/deepinsight/insightface/blob/master/detection/retinaface/test.py)测试得到，这里将`RetinaFace`的image shape修改为`640x480`进行测试。`MobileFaceNet-mxnet`的性能数据是使用脚本：[verification.py](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_mxnet/verification.py)测试得到。
 
 
+<a name="1.3"></a>
+
 ### 1.3 可视化结果展示
 
 基于 `InsightFacePaddle` 的预测结果，示例如下，更多示例结果请参考 [示例](./demo/friends/output/)。
@@ -59,6 +79,8 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 <img src="./demo/friends/output/friends3.jpg"  width = "800" />
 </div>
 
+<a name="1.4"></a>
+
 ### 1.4 欢迎加入深度学习技术交流群
 
 QQ扫描二维码加入交流群（群号：`705899115`）。
@@ -66,6 +88,8 @@ QQ扫描二维码加入交流群（群号：`705899115`）。
 <div align="center">
 <img src="./qq_group.jpeg"  width = "300" />
 </div>
+
+<a name="2"></a>
 
 ## 2. 安装
 1. 安装 PaddlePaddle
@@ -105,9 +129,13 @@ python3 setup.py bdist_wheel
 pip3 install dist/*
 ```
 
+<a name="3"></a>
+
 ## 3. 快速开始
 
 `InsightFacePaddle` 提供 `命令行（Command Line）` 和 `Python接口` 两种使用方式。
+
+<a name="3.1"></a>
 
 ### 3.1 命令行
 
@@ -224,6 +252,8 @@ insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/fr
 insightfacepaddle --det --rec --index ./demo/friends/index.bin --input ./demo/friends/query/friends.mp4 --output ./output
 ```
 
+<a name="3.2"></a>
+
 ### 3.2 Python
 
 同样可以在 Python 中使用 `InsightFacePaddle`。首先导入 `InsightFacePaddle`，因为 `InsightFacePaddle` 使用 `logging` 控制日志输入，因此需要导入 `logging`。
@@ -238,8 +268,7 @@ logging.basicConfig(level=logging.INFO)
 
 ```python
 parser = face.parser()
-help_info = parser.print_help()
-print(help_info)
+parser.print_help()
 ```
 
 #### 3.2.2 构建索引
