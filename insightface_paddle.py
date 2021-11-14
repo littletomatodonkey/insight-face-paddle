@@ -770,7 +770,7 @@ class InsightFace(object):
                 "labels": labels
             }
         completion_tip = "Predict complete! "
-        if self.args.output:
+        if self.args.output and hasattr(self, "det_predictor"):
             completion_tip += f"All prediction result(s) have been saved in \"{self.args.output}\"."
         logging.info(completion_tip)
 
