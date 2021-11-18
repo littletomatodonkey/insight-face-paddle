@@ -560,7 +560,7 @@ class Recognizer(BasePredictor):
             candidate_idx = np.delete(candidate_idx, remove_idx)
             candidate_label_list = list(np.array(self.label)[candidate_idx])
             if len(candidate_label_list) == 0:
-                maxlabel = ""
+                maxlabel = "unknown"
             else:
                 maxlabel = max(candidate_label_list,
                                key=candidate_label_list.count)
