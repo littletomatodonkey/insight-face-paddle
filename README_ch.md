@@ -40,7 +40,10 @@
 - 人脸识别相关内容可以参考：[人脸识别](https://github.com/deepinsight/insightface/blob/master/recognition/arcface_paddle/README_cn.md)。
 - 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](https://github.com/deepinsight/insightface/blob/master/detection/blazeface_paddle/README_cn.md)。
 
-Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
+Note: 
+
+* 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
+* 本项目仅用于快速体验人脸检测与识别全流程，如果希望获得更高的精度，建议使用精度更高的模型。
 
 <a name="1.2"></a>
 
